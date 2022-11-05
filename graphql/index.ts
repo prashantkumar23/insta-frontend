@@ -8,7 +8,7 @@ console.log("EndPOint", endpoint)
 
 export const graphQLClientForFrontend = new GraphQLClient(endpoint, {
   credentials: "include",
-  mode: "cors"
+  mode: "cors",
 });
 
 export const graphQLClientForServer = (token: IToken) => {
