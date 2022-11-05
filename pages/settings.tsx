@@ -1,15 +1,18 @@
 import { Center, Divider, Grid, Paper, ScrollArea, Stepper, Tabs, Title, Text } from '@mantine/core';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
 import { useState } from 'react';
 import { SettingInfoCard } from '../components/Settings/SettingInfoCard';
+import getUserDetail, { IGetUserDetail } from '../hooks/auth/useGetUserDetail';
 import AppLayout from '../layout/AppLayout';
 import AccountSetting from '../layout/Settings/AccountSetting';
+import { getToken } from '../utility/gettoken';
 
-const SettingsPage = () => {
+const SettingsPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const [active, setActive] = useState(1);
 
   return (
-    <AppLayout user={}>
+    <AppLayout user={props.user!}>
       <Paper
         withBorder
         radius={'xl'}
@@ -47,12 +50,28 @@ const SettingsPage = () => {
   );
 };
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
+
+  const session = await queryClient.fetchQuery<IGetUserDetail>(['getUserDetail'], async () =>
+    getUserDetail(getToken(context))
+  );
+
+  if (!session.isAuth) {
+    return {
+      redirect: {
+        permanent: false,
+        destination: '/login',
+      },
+    };
+  }
+
+  const fetchedUser = queryClient.getQueryData<IGetUserDetail>(['getUserDetail']);
 
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
+      user: fetchedUser!.user,
     },
   };
 }
