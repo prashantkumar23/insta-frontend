@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
 
-import { graphQLClient } from '../../graphql';
+import { graphQLClientForFrontend } from '../../graphql';
 
 export interface IDeletePost {
   postId: string;
@@ -26,7 +26,7 @@ function useDeletePost({ postId, s3bucketObjectIds }: IDeletePost) {
   return useMutation(
     ['deletePost'],
     async () => {
-      const data = await graphQLClient.request(mutation, variables);
+      const data = await graphQLClientForFrontend.request(mutation, variables);
       return data;
     },
     {

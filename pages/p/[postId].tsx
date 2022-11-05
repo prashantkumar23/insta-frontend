@@ -42,7 +42,9 @@ const PostPage: NextPage = (props) => {
     userId: props.user.id,
     postId: postId as string,
   });
+  //@ts-ignore
   const { mutate: likePost, data: likeData } = useLikePost({ postId: PostData!._id, userId: props.user.id });
+   //@ts-ignore
   const { mutate: unlikePost, data: unlikeData } = useUnlikePost({ postId: PostData!._id, userId: props.user.id });
 
 
@@ -53,6 +55,7 @@ const PostPage: NextPage = (props) => {
 
   if (true) {
     return (
+      //@ts-ignore
       <AppLayout user={props.user}>
         <Center>
           <Paper style={{ width: '80%', height: '60vh' }} withBorder radius={'lg'} p={15}>
@@ -94,9 +97,9 @@ const PostPage: NextPage = (props) => {
                         <ActionIcon
                           onClick={() => {
                             if (PostData!.wasLikeByMe) {
-                              unlikePost(PostData);
+                              // unlikePost(PostData);
                             } else {
-                              likePost(PostData);
+                              // likePost(PostData);
                             }
                           }}
                         >
@@ -171,75 +174,75 @@ const PostPage: NextPage = (props) => {
     );
   }
 
-  return (
-    <AppLayout user={props.user}>
-      <Grid>
-        <Grid.Col span={6}>
-          {PostData && (
-            <PostCard
-              me={props.user}
-              post={{
-                id: PostData._id,
-                imageUrl: 'https://d7cbio25mx5nv.cloudfront.net/' + PostData.imageUrl.split('/')[3],
-                caption: PostData.caption,
-                likes: PostData.likes,
-                comments: PostData.comments,
-                createdAt: PostData.createdAt,
-                wasLikeByMe: PostData.wasLikeByMe,
-                user: {
-                  id: PostData.userId._id,
-                  name: PostData.userId.name,
-                  username: PostData.userId.username,
-                  pic: PostData.userId.pic,
-                },
-              }}
-              postId={PostData._id}
-            />
-          )}
-        </Grid.Col>
-        <Grid.Col span={6}>
-          {PostData && (
-            <Container>
-              <Card>
-                <ScrollArea>
-                  {PostData.commentIds.map((c) => {
-                    return (
-                      <Card radius={'xl'} pb={0}>
-                        <Stack>
-                          <Group spacing={9} align="center" pb={0}>
-                            <Avatar src={c.whoCommented.pic} radius="xl" size="sm" />
-                            <Text size={13}>{c.whoCommented.username}</Text>
-                          </Group>
+  // return (
+  //   <AppLayout user={props.user}>
+  //     <Grid>
+  //       <Grid.Col span={6}>
+  //         {PostData && (
+  //           <PostCard
+  //             me={props.user}
+  //             post={{
+  //               id: PostData._id,
+  //               imageUrl: 'https://d7cbio25mx5nv.cloudfront.net/' + PostData.imageUrl.split('/')[3],
+  //               caption: PostData.caption,
+  //               likes: PostData.likes,
+  //               comments: PostData.comments,
+  //               createdAt: PostData.createdAt,
+  //               wasLikeByMe: PostData.wasLikeByMe,
+  //               user: {
+  //                 id: PostData.userId._id,
+  //                 name: PostData.userId.name,
+  //                 username: PostData.userId.username,
+  //                 pic: PostData.userId.pic,
+  //               },
+  //             }}
+  //             postId={PostData._id}
+  //           />
+  //         )}
+  //       </Grid.Col>
+  //       <Grid.Col span={6}>
+  //         {PostData && (
+  //           <Container>
+  //             <Card>
+  //               <ScrollArea>
+  //                 {PostData.commentIds.map((c) => {
+  //                   return (
+  //                     <Card radius={'xl'} pb={0}>
+  //                       <Stack>
+  //                         <Group spacing={9} align="center" pb={0}>
+  //                           <Avatar src={c.whoCommented.pic} radius="xl" size="sm" />
+  //                           <Text size={13}>{c.whoCommented.username}</Text>
+  //                         </Group>
 
-                          <Text size={13} ml={30} mt={0} pt={0}>
-                            {c.comment}
-                          </Text>
-                        </Stack>
+  //                         <Text size={13} ml={30} mt={0} pt={0}>
+  //                           {c.comment}
+  //                         </Text>
+  //                       </Stack>
 
-                        <Button
-                          onClick={() => {
-                            flushSync(() => setCommentIdToBeDeleted(c._id));
-                            if (commentIdToBeDeleted.length > 0) {
-                              deleteMutation({
-                                commentId: c._id,
-                                postId,
-                              });
-                            }
-                          }}
-                        >
-                          Delete
-                        </Button>
-                      </Card>
-                    );
-                  })}
-                </ScrollArea>
-              </Card>
-            </Container>
-          )}
-        </Grid.Col>
-      </Grid>
-    </AppLayout>
-  );
+  //                       <Button
+  //                         onClick={() => {
+  //                           flushSync(() => setCommentIdToBeDeleted(c._id));
+  //                           if (commentIdToBeDeleted.length > 0) {
+  //                             deleteMutation({
+  //                               commentId: c._id,
+  //                               postId,
+  //                             });
+  //                           }
+  //                         }}
+  //                       >
+  //                         Delete
+  //                       </Button>
+  //                     </Card>
+  //                   );
+  //                 })}
+  //               </ScrollArea>
+  //             </Card>
+  //           </Container>
+  //         )}
+  //       </Grid.Col>
+  //     </Grid>
+  //   </AppLayout>
+  // );
 };
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {

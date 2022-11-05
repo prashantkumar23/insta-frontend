@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
 
-import { graphQLClient } from '../../graphql';
+import { graphQLClientForFrontend } from '../../graphql';
 
 export interface ISearch {
   searchTerm: string;
@@ -24,7 +24,7 @@ function useSearch({ searchTerm }: ISearch) {
   return useQuery(
     ['search', searchTerm],
     async () => {
-      const data = await graphQLClient.request(query, variables);
+      const data = await graphQLClientForFrontend.request(query, variables);
       return data;
     },
     {

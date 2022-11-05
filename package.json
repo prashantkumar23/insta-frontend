@@ -40,7 +40,7 @@
     "@next-auth/react-query": "^0.0.12",
     "@next/bundle-analyzer": "^12.1.4",
     "@next/swc-win32-x64-msvc": "^11.1.2",
-    "@tabler/icons": "^1.78.1",
+    "@tabler/icons": "^1.110.0",
     "@tanstack/react-query": "^4.0.10",
     "amazon-cognito-identity-js": "^5.2.10",
     "aws-sdk": "^2.1185.0",

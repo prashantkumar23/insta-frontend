@@ -9,7 +9,7 @@ const SettingsPage = () => {
   const [active, setActive] = useState(1);
 
   return (
-    <AppLayout>
+    <AppLayout user={}>
       <Paper
         withBorder
         radius={'xl'}

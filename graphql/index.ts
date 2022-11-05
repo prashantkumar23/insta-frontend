@@ -14,8 +14,8 @@ export const graphQLClientForFrontend = new GraphQLClient(endpoint, {
 export const graphQLClientForServer = (token: IToken) => {
   return new GraphQLClient(endpoint, {
     headers: {
-        accesstoken: token.accesstoken,
-        idtoken: token.idtoken    
+      accesstoken: token.accesstoken!,
+      idtoken: token.idtoken!
     }
   })
 }
