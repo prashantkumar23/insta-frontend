@@ -6,7 +6,6 @@ import {
   Grid,
   Group,
   Image,
-  Space,
   Stack,
   Text,
   TextInput,
@@ -14,6 +13,7 @@ import {
 import {
   IconArrowUpRight,
   IconBookmark,
+  IconCheck,
   IconDots,
   IconHeart,
   IconMessage,
@@ -21,15 +21,16 @@ import {
   IconSend,
 } from '@tabler/icons';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User } from '../../hooks/auth/useGetUserDetail';
-import useCreateComment from '../../hooks/comment/useCreateComment';
+import useCreateComment, { ICreateComment } from '../../hooks/comment/useCreateComment';
 import { FeedPost } from '../../hooks/post/useGetFeedPost';
 import useLikePost from '../../hooks/post/useLikePost';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import useUnlikePost from '../../hooks/post/useUnlikePost';
 import useGetPost from '../../hooks/post/useGetPost';
 import { useRouter } from 'next/router';
+import { showNotification } from '@mantine/notifications';
 dayjs.extend(relativeTime);
 
 export interface IPostCard {
@@ -38,25 +39,102 @@ export interface IPostCard {
   me: User;
 }
 
+export const ReadMoreOrLess = ({
+  limit,
+  text,
+  postId,
+}: {
+  limit: number;
+  text: string;
+  postId: string;
+}) => {
+  const [isReadMoreShown, setIsReadMoreShown] = useState(false);
+  const router = useRouter();
+
+  const toggleBtn = () => {
+    console.log(router.pathname);
+    if (router.pathname.includes('/p')) {
+      setIsReadMoreShown((prevState) => !prevState);
+      return;
+    }
+    router.push(`/p/${postId}`);
+  };
+
+  return (
+    <span className="read-more-read-less">
+      {text.length > 100 ? (
+        <>
+          <Text size={'xs'} style={{ display: 'inline' }}>
+            {isReadMoreShown ? text : text.substring(0, limit)}
+          </Text>
+          <Button
+            onClick={toggleBtn}
+            compact
+            size="xs"
+            variant="subtle"
+            sx={{
+              '&:hover': {
+                backgroundColor: 'transparent',
+              },
+              color: 'GrayText',
+            }}
+          >
+            {isReadMoreShown ? 'read less' : 'read more'}
+          </Button>
+        </>
+      ) : (
+        <Text size="xs" style={{ display: 'inline' }}>
+          {text}
+        </Text>
+      )}
+    </span>
+  );
+};
+
 const PostCard: React.FC<IPostCard> = ({ post, me }) => {
   const { id, imageUrl, createdAt, caption, likes, comments, user } = post;
   // console.log('Image Url', imageUrl);
   const router = useRouter();
   const [value, onChange] = useState('');
   const [comment, setComment] = useState('');
-  const [showMoreCaption, setShowMoreCaption] = useState(true);
 
   const { mutate: likePost, data: likeData } = useLikePost({ postId: id, userId: me.id });
   const { mutate: unlikePost, data: unlikeData } = useUnlikePost({ postId: id, userId: me.id });
-  const { mutate: commentPost, data: commentData } = useCreateComment({
+  const {
+    mutate: commentPost,
+    data: commentData,
+    isSuccess: commentDataIsSuccess,
+    isLoading: commentIsLoading,
+  } = useCreateComment({
     comment,
     postId: id,
     whoCommented: me.id,
     wasLikeByMe: false,
   });
 
+  useEffect(() => {
+    if (commentDataIsSuccess && commentData.comment) {
+      setComment('');
+      showNotification({
+        message: 'Comment posted',
+        radius: 'sm',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+    }
+  }, [commentDataIsSuccess]);
+
   return (
-    <Card radius={'lg'} withBorder style={{ maxWidth: '500px' }}>
+    <Card
+      radius={'lg'}
+      withBorder
+      sx={() => ({
+        width: 500,
+        '@media (max-width: 650px)': {
+          width: "100%",
+        },
+      })}
+    >
       <Stack>
         {/* Header */}
         <Group position="apart">
@@ -67,28 +145,23 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
             </Text>
           </Group>
 
-          <IconDots size={22} />
+          {/* <IconDots size={22} /> */}
         </Group>
 
         {/* Pics */}
         <Card.Section mt={0} style={{ objectFit: 'cover', overflow: 'hidden' }}>
-          <Image
-            src={imageUrl}
-            // src={"https://images.unsplash.com/photo-1509043759401-136742328bb3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8&w=1000&q=80"}
-            alt="No image"
-          />
+          <Image src={imageUrl} alt="No image" />
         </Card.Section>
 
         {/* Statitics  */}
         <Grid>
-          <Grid.Col span={4}>
+          <Grid.Col span={'content'} pl={0}>
             <div
               style={{
                 display: 'flex',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
                 columnGap: 2,
-                width: '100%',
                 cursor: 'pointer',
               }}
             >
@@ -102,7 +175,7 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
                 }}
               >
                 <IconHeart
-                  size={22}
+                  size={20}
                   fill={`${post.wasLikeByMe ? 'red' : 'white'}`}
                   stroke={'1px'}
                   style={{
@@ -111,13 +184,13 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
                 />
               </ActionIcon>
 
-              <Text color="dimmed" size={13}>
+              <Text color="dimmed" size={12}>
                 {likes} Likes
               </Text>
             </div>
           </Grid.Col>
 
-          <Grid.Col span={4}>
+          <Grid.Col span={'content'}>
             <div
               style={{
                 display: 'flex',
@@ -130,33 +203,11 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
               onClick={() => router.push(`/p/${post.id}`)}
             >
               <ActionIcon>
-                <IconMessage2 size={22} stroke={'1px'} />
+                <IconMessage2 size={20} stroke={'1px'} />
               </ActionIcon>
 
-              <Text color="dimmed" size={13}>
+              <Text color="dimmed" size={12}>
                 {comments} Comments
-              </Text>
-            </div>
-          </Grid.Col>
-
-          <Grid.Col span={4}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                columnGap: 2,
-                width: '100%',
-                paddingRight: 20,
-                cursor: 'pointer',
-              }}
-            >
-              <ActionIcon>
-                <IconSend size={20} stroke={'1px'} />
-              </ActionIcon>
-
-              <Text color="dimmed" size={13}>
-                Send
               </Text>
             </div>
           </Grid.Col>
@@ -167,60 +218,38 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
         </Text>
 
         {/* Caption */}
-        <Text lineClamp={showMoreCaption ? 2 : undefined} size={13}>
-          {caption}
-        </Text>
-
-        {/* <Button onClick={() => setShowMoreCaption(!showMoreCaption)} size="sm" variant="subtle">
-          {showMoreCaption ? 'More' : 'Less'}
-        </Button> */}
-
-        {/* <RichTextEditor
-          ref={editorRef}
-          value={` Lorem ipsum dolor sit, amet consectetur adipisicing elit. Harum dolores unde fuga ipsa rem
-          hic laboriosam a necessitatibus, id, aperiam eos, praesentium in sequi sunt sint. Unde
-          neque molestias animi. Lorem ipsum, dolor sit amet consectetur adipisicing elit. Quo
-          distinctio ipsam hic voluptas quis, sit repellendus possimus, tempora deserunt amet,
-          inventore eos recusandae dolores officia explicabo. Tempore odit doloremque architecto!
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam quibusdam libero ipsa maiores
-          dolorem officiis? Ratione in modi ex, nostrum voluptate similique, minima maiores
-          laboriosam, magnam hic molestias eos omnis.`}
-          onChange={onChange}
-          readOnly
-        /> */}
+        <ReadMoreOrLess limit={170} text={post.caption} postId={post.id} />
 
         {/* Comment Section */}
         <Grid>
-          <Grid.Col span={2}>
-            <Avatar src={me.pic} radius={'xl'} />
+          <Grid.Col span={'content'}>
+            <Avatar src={me.pic} radius={'xl'} size={30} />
           </Grid.Col>
 
-          <Grid.Col span={10}>
+          <Grid.Col span={'auto'}>
             <TextInput
               radius="xl"
+              size="xs"
+              maxLength={100}
+              onKeyDown={(e) => (e.key === 'Enter' ? commentPost() : undefined)}
               rightSection={
-                <IconArrowUpRight
-                  size={20}
-                  onClick={() =>
-                    commentPost({
-                      userComment: {
-                        _id: "",
-                        comment,
-                        whoCommented: {
-                          name: me.name,
-                          pic: me.pic,
-                          username: me.username,
-                          _id: me.id,
-                        },
-                      },
-                      postId: post.id,
-                      route: router.pathname,
-                    })
-                  }
-                />
+                <Button
+                  mr={20}
+                  compact
+                  size="xs"
+                  variant="subtle"
+                  sx={{
+                    '&:hover': { backgroundColor: 'transparent' },
+                    backgroundColor: 'transparent',
+                    '&:disabled': { backgroundColor: 'transparent' },
+                  }}
+                  onClick={() => commentPost()}
+                  disabled={commentIsLoading || comment.trim().length === 0}
+                >
+                  Post
+                </Button>
               }
-              placeholder={'Have a thought on this post?'}
-              style={{ width: '100%' }}
+              placeholder={`comment as ${me.username}`}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
             />

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AppProps } from 'next/app';
 import { getCookie, setCookie } from 'cookies-next';
 import Head from 'next/head';
+import { NavigationProgress } from '@mantine/nprogress';
 import {
   MantineProvider,
   ColorScheme,
@@ -17,6 +18,7 @@ import { NotificationsProvider } from '@mantine/notifications';
 import { Account } from '../context/Accounts';
 import { IconArrowUp } from '@tabler/icons';
 import { useWindowScroll } from '@mantine/hooks';
+import { RouterTransition } from '../components/RouterTransition';
 
 export default function App(props: AppProps & { colorScheme: ColorScheme }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -45,11 +47,12 @@ export default function App(props: AppProps & { colorScheme: ColorScheme }) {
           <Hydrate state={pageProps.dehydratedState}>
             <ColorSchemeProvider colorScheme={colorScheme} toggleColorScheme={toggleColorScheme}>
               <MantineProvider
-                theme={{ colorScheme }}
+                theme={{ colorScheme: 'light' }}
                 withGlobalStyles
                 withNormalizeCSS
                 // emotionCache={myCache}
               >
+                <RouterTransition />
                 <NotificationsProvider>
                   <Component {...pageProps} />
                   <Affix position={{ bottom: 50, right: 20 }} style={{ cursor: 'pointer' }}>

@@ -1,7 +1,18 @@
 import React, { Suspense, useContext, useEffect, useState } from 'react';
-import { Button, Card, Container, Grid, Stack, Title, Text } from '@mantine/core';
+import {
+  Button,
+  Card,
+  Container,
+  Grid,
+  Stack,
+  Title,
+  Text,
+  Divider,
+  Group,
+  Avatar,
+} from '@mantine/core';
 import AppLayout from '../layout/AppLayout';
-import { dehydrate, QueryClient, useQuery } from '@tanstack/react-query';
+import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from 'next';
 import { useMediaQuery } from '@mantine/hooks';
 
@@ -13,15 +24,17 @@ import getUserDetail from '../hooks/auth/useGetUserDetail';
 import { getToken } from '../utility/gettoken';
 import useGetUserRecommendation from '../hooks/user/useGetRecommendation';
 import { UserRecommendation } from '../hooks/user/useGetRecommendation';
+import { useRouter } from 'next/router';
 
-const LIMIT = 5
+const LIMIT = 50;
 
 const HomePage: NextPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const { refetch, data } = useGetFeedPost({ userId: props.user.id!, limit: LIMIT, skip: 0 });
   const { refetch: UserRecommendation, data: UserRecommendationData } = useGetUserRecommendation({
     limit: 5,
-    userId: props.user.id
+    userId: props.user.id,
   });
+  const router = useRouter();
 
   useEffect(() => {
     refetch();
@@ -30,7 +43,7 @@ const HomePage: NextPage = (props: InferGetServerSidePropsType<typeof getServerS
 
   const matches = useMediaQuery('(min-width: 850px)', false);
 
-  console.log(UserRecommendationData)
+  // console.log('UserRecommendationData', UserRecommendationData, props.user);
 
   const PostCardEle = (data: FeedPost[]) =>
     data.map((ele: FeedPost) => (
@@ -38,26 +51,45 @@ const HomePage: NextPage = (props: InferGetServerSidePropsType<typeof getServerS
     ));
   const UserRecommendationEle = () =>
     UserRecommendationData!.users?.map((ele: UserRecommendation) => (
-      <UserRecommendationCard username={ele.username} name={ele.name} pic={ele.pic} userId={ele._id} followedByMe={ele.followedByMe} myId={props.user.id} key={ele._id} />
+      <UserRecommendationCard
+        username={ele.username}
+        name={ele.name}
+        pic={ele.pic}
+        userId={ele._id}
+        followedByMe={ele.followedByMe}
+        myId={props.user.id}
+        key={ele._id}
+      />
     ));
 
   return (
     <AppLayout user={props.user}>
-      <Container>
-        <Text>{data?.count}</Text>
-        <Grid>
-          <Grid.Col sm={matches ? 7 : 12}>
-            <Stack spacing={10}>{data && PostCardEle(data.posts!)}</Stack>
+      <Grid>
+        <Grid.Col sm={matches ? 7 : 12} style={{ backgroundColor: '' }}>
+          <Stack spacing={10} align={matches ? 'flex-end' : 'center'}>
+            {data && PostCardEle(data.posts!)}
+          </Stack>
+        </Grid.Col>
+        {matches ? (
+          <Grid.Col sm={matches ? 5 : 0} style={{ backgroundColor: '' }}>
+            <div>
+              <Stack spacing={10}>
+                <Card radius={"lg"} withBorder>
+                  <Group position="apart">
+                    <Group>
+                      <Avatar src={props.user.pic} radius="xl" />
+                      <Text size="xs">{props.user.username}</Text>
+                    </Group>
+                    <Button compact size="xs" sx={{"&:hover": {backgroundColor: "transparent"}}} variant="subtle" onClick={() => router.push("/me")}>View</Button>
+                  </Group>
+                </Card>
+                {UserRecommendationData && <Divider/>}
+                {UserRecommendationData && UserRecommendationEle()}
+              </Stack>
+            </div>
           </Grid.Col>
-          {matches ? (
-            <Grid.Col sm={matches ? 5 : 0}>
-              <div>
-                <Stack spacing={10}>{UserRecommendationData && UserRecommendationEle()}</Stack>
-              </div>
-            </Grid.Col>
-          ) : null}
-        </Grid>
-      </Container>
+        ) : null}
+      </Grid>
     </AppLayout>
   );
 };

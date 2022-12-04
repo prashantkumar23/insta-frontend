@@ -11,6 +11,7 @@ import {
   Anchor,
   Center,
   Box,
+  useMantineTheme,
 } from '@mantine/core';
 // import { IconArrowLeft, IconCheck, IconX } from '@tabler/icons';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
@@ -21,6 +22,7 @@ import { CognitoUser } from 'amazon-cognito-identity-js';
 import { showNotification } from '@mantine/notifications';
 // import useResetPassword from '../hooks/auth/useResetPassword';
 import { NextLink } from '@mantine/next';
+import { IconCheck } from '@tabler/icons';
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -57,6 +59,7 @@ function ForgotPassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState({ value: false, message: '' });
+  const theme = useMantineTheme();
 
   const queryClient = new QueryClient();
   // const { refetch, isSuccess, isError, error, isFetching } = useSendCode({ email: email.value });
@@ -145,7 +148,7 @@ function ForgotPassword() {
         >
           <Paper style={{ width: '100%' }} p="xl" radius={'xl'}>
             <Title className={classes.title} align="center">
-              Forgot your password?
+              Forgot your password ?
             </Title>
             <Text color="dimmed" size="sm" align="center">
               Enter your registered email to get a code
@@ -262,12 +265,12 @@ function ForgotPassword() {
             minHeight: '100vh',
           }}
         >
-          <Paper style={{ width: '100%' }}>
+          <Paper style={{ width: '100%' }} p={30} radius="xl">
             <Title className={classes.title} align="center">
-              Great! your password now is changed
+              Great! your password now is changed <IconCheck style={{ backgroundColor: theme.colors.green[6],color: "white", borderRadius: "50%", padding: 2}}/>
             </Title>
-            <Text align="center" mt={15}>
-              Now you can login back
+            <Text align="center" mt={15} size="xs">
+              Now you can login again
             </Text>
 
             <Group position="center" mt="lg" className={classes.controls}>
@@ -286,9 +289,6 @@ function ForgotPassword() {
 
 export async function getStaticProps() {
   const queryClient = new QueryClient();
-
-  // await queryClient.prefetchQuery(['posts'], getPosts);
-  // await queryClient.prefetchQuery(['films'], getFilms);
 
   return {
     props: {

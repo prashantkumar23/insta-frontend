@@ -1,4 +1,11 @@
-import React, { forwardRef, Fragment, useContext, useEffect, useLayoutEffect, useState } from 'react';
+import React, {
+  forwardRef,
+  Fragment,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from 'react';
 import {
   createStyles,
   Container,
@@ -15,10 +22,10 @@ import MenuComponent from '../Menu';
 import { NextLink } from '@mantine/next';
 import NotificationMenuComponent from '../NotificationMenu';
 import { IconBrandInstagram } from '@tabler/icons';
-import CreatePostDialog from '../HomePage/CreatePost';
+
 import CreatePostButton from '../Buttons/CreatePostButton';
 import { AccountContext } from '../../context/Accounts';
-import { useDebouncedValue } from '@mantine/hooks';
+import { useDebouncedValue, useMediaQuery } from '@mantine/hooks';
 import { User } from '../../hooks/auth/useGetUserDetail';
 
 const HEADER_HEIGHT = 60;
@@ -167,7 +174,7 @@ interface ItemProps extends SelectItemProps {
 
 const AutoCompleteItem = forwardRef<HTMLDivElement, ItemProps>(
   ({ description, value, image, ...others }: ItemProps, ref) => (
-    <div ref={ref} {...others} style={{borderRadius: "0.7rem"}}>
+    <div ref={ref} {...others} style={{ borderRadius: '0.7rem' }}>
       <Group noWrap>
         <Avatar src={image} />
         <div>
@@ -183,18 +190,20 @@ interface HeaderTabsProps {
   links: { link: string; label: string }[];
 }
 
-export function Header({user}: HeaderTabsProps) {
+export function Header({ user }: HeaderTabsProps) {
   const { classes, theme, cx } = useStyles();
-  const [opened, setOpened] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState('');
   const [debounced] = useDebouncedValue(searchTerm, 1000);
+  const matches = useMediaQuery('(max-width: 500px)', true, { getInitialValueInEffect: false });
 
   useEffect(() => {
-    // console.log("Debounced Value", debounced)
-  }, [debounced])
+    console.log("Debounced Value", debounced)
+  }, [debounced]);
 
   return (
-    <div className={classes.header}>
+    <div className={classes.header}
+    //  style={{backgroundColor: matches ? "lightgreen": "lightcoral"}}
+     >
       <Container className={classes.mainSection}>
         <Group position="apart">
           {/* <MantineLogo /> */}
@@ -202,34 +211,27 @@ export function Header({user}: HeaderTabsProps) {
             <IconBrandInstagram size={50} style={{ color: 'rgb(131,58,180)' }} />
           </NextLink>
 
-          <Group position="apart">
+          <Group>
             <Autocomplete
-              radius={"lg"}
+              radius={'lg'}
               value={searchTerm}
               onChange={setSearchTerm}
               placeholder="Search..."
               itemComponent={AutoCompleteItem}
               data={data}
               filter={(value, item) =>
-                item.value.toLowerCase().includes(searchTerm.toLowerCase().trim()) 
+                item.value.toLowerCase().includes(searchTerm.toLowerCase().trim())
               }
-              style={{width: "16rem"}}
-            />
-            {/* {user ? <Fragment> */}
-            <CreatePostButton onClick={() => setOpened(true)} radius="xl" />
-            <CreatePostDialog opened={opened} setOpened={setOpened} user={user} />
+              // style={{ width: '16rem' }}
+            /> 
+            {/* <CreatePostButton  radius="xl" /> */}
+            {/* {user ? <Fragment>
+         
+        
             {/* </Fragment>: null} */}
           </Group>
 
-          <Group>
-         
-              <Indicator>
-                <NotificationMenuComponent />
-              </Indicator>
-           
-
-            <MenuComponent />
-          </Group>
+          <MenuComponent {...user} />
         </Group>
       </Container>
     </div>

@@ -1,4 +1,5 @@
 import { Button, ButtonProps } from '@mantine/core';
+import { Icon123, IconPlus } from '@tabler/icons';
 
 const CreatePostButton = (props: ButtonProps & React.HTMLAttributes<HTMLButtonElement>) => {
   return (
@@ -10,7 +11,7 @@ const CreatePostButton = (props: ButtonProps & React.HTMLAttributes<HTMLButtonEl
           transition: '0.5s',
           backgroundSize: '200% auto',
           color: 'white',
-          boxShadow: '0 0 20px #eee',
+          // boxShadow: '0 0 20px #eee',
           borderRadius: '10px',
 
           '&:hover': {
@@ -22,7 +23,7 @@ const CreatePostButton = (props: ButtonProps & React.HTMLAttributes<HTMLButtonEl
       })}
       {...props}
     >
-        Create Post
+        <IconPlus size={15}/>
     </Button>
   );
 };

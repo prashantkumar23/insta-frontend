@@ -1,7 +1,8 @@
 import { Button, Input, Modal, Stack, Image, Textarea } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
-import { IconX } from '@tabler/icons';
+import { IconCheck, IconX } from '@tabler/icons';
 import { useEffect, useState } from 'react';
+import { Heart } from 'tabler-icons-react';
 import { User } from '../../../hooks/auth/useGetUserDetail';
 import useCreatePost from '../../../hooks/post/useCreatePost';
 
@@ -29,10 +30,10 @@ const CreatePost = ({ opened, setOpened, user }: ICreatePostDialog) => {
         message: data!.message,
         radius: 'sm',
         color: 'green',
-        icon: <IconX size={18} />,
+        icon: <IconCheck size={18} />,
       });
       setOpened(false);
-      setCaption("");
+      setCaption('');
       setPreview(null);
     }
   }, [isSuccess]);
@@ -61,14 +62,18 @@ const CreatePost = ({ opened, setOpened, user }: ICreatePostDialog) => {
   };
 
   return (
-    <Modal opened={opened} onClose={() => setOpened(false)} centered radius={'xl'}>
+    <Modal opened={opened} onClose={() => {
+      setOpened(false)
+      setCaption("")
+      setPreview(null);
+    }} centered radius={'xl'} closeOnClickOutside={false} closeOnEscape={false} trapFocus>
       <Stack>
         <Input
           type="file"
           accept="image/*"
           onChange={onSelectFile}
           radius="xl"
-          style={{ backgroundColor: 'transparent', borderColor: 'transparent' }}
+          style={{ backgroundColor: 'transparent', borderColor: 'blue', outline: "none" }}
           disabled={isLoading}
         />
         {selectedFile && <Image src={preview} />}
@@ -79,8 +84,10 @@ const CreatePost = ({ opened, setOpened, user }: ICreatePostDialog) => {
           minRows={2}
           maxRows={8}
           disabled={isLoading}
+          maxLength={2200}
+          placeholder="Your caption..."
         />
-        <Button radius={'xl'} onClick={() => mutate()} disabled={isLoading}>
+        <Button radius={'xl'} onClick={() => mutate()} disabled={isLoading || (caption.length === 0 || !preview)}>
           Post
         </Button>
       </Stack>

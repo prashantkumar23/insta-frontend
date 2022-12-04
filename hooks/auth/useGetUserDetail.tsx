@@ -1,4 +1,4 @@
-import request, { gql } from 'graphql-request';
+import { gql } from 'graphql-request';
 import { graphQLClientForServer } from '../../graphql';
 import { IToken } from '../../interfaces';
 
@@ -41,7 +41,7 @@ async function getUserDetail(tokens: IToken) {
         message
         user {
           id
-          name
+          name  
           username
           pic
           email

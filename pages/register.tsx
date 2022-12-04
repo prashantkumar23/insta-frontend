@@ -14,6 +14,7 @@ import {
   Group,
   Stepper,
   Divider,
+  useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { NextLink } from '@mantine/next';
@@ -38,7 +39,7 @@ const useStyles = createStyles((theme) => ({
     minHeight: 900,
     backgroundSize: 'cover',
     backgroundImage:
-      'url(https://i.pinimg.com/originals/bf/82/f6/bf82f6956a32819af48c2572243e8286.jpg)',
+      'url(https://wallpaperaccess.com/full/459723.jpg)',
   },
 
   form: {
@@ -77,7 +78,7 @@ type SUCCESS = 'SUCCESS';
 export function Register() {
   const { classes } = useStyles();
   const [active, setActive] = useState(0);
-
+  const theme = useMantineTheme();
   const [signUpResult, setSignUpResult] = useState<ISignUpResult | undefined | SUCCESS>(undefined);
 
   const form = useForm({
@@ -225,23 +226,18 @@ export function Register() {
           >
             Welcome to Insta Clone!
           </Title>
-          <Text color="dimmed" size="sm" align="center" mt={5}>
-            Have an account yet?{' '}
-            <Link passHref href="/login">
-              Login
-            </Link>
-          </Text>
+         
         </Container>
 
         <Container size={500}>
           <Paper shadow="none" radius="xl" p="xl" style={{ width: '100%' }}>
             <Stepper active={active} breakpoint="sm" size="xs">
               <Stepper.Step
-                label="General Information"
-                description="Enter the Details"
-                icon={
-                  <IconSignRight size={18} style={{ backgroundColor: 'green', color: 'white' }} />
-                }
+                // label="General Information"
+                // description="Enter the Details"
+                // icon={
+                //   <IconSignRight size={18} style={{ backgroundColor: 'green', color: 'white' }} />
+                // }
               >
                 <TextInput
                   label="Name"
@@ -275,9 +271,9 @@ export function Register() {
               </Stepper.Step>
 
               <Stepper.Step
-                label="Verify Email"
-                description="Enter the code"
-                icon={<IconMailOpened size={18} />}
+                // label="Verify Email"
+                // description="Enter the code"
+                // icon={<IconMailOpened size={18} />}
                 // loading
               >
                 <TextInput
@@ -326,6 +322,21 @@ export function Register() {
                 </NextLink>
               )}
             </Group>
+
+            <Text color="dimmed" size="xs" align="end" mt={15}>
+            Have an account?{' '}
+            <Link passHref href="/login">
+                  <Text
+                    style={{
+                      display: 'inline',
+                      color: theme.primaryColor,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Login
+                  </Text>
+                </Link>
+          </Text>
           </Paper>
         </Container>
       </Paper>

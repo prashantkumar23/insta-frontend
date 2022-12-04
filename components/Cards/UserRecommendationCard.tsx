@@ -1,4 +1,8 @@
 import { Avatar, Button, Card, Group, Text, Stack } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
+import { IconCheck } from '@tabler/icons';
+import { useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import useFollow from '../../hooks/user/useFollow';
 import useUnfollow from '../../hooks/user/useUnfollow';
 
@@ -19,8 +23,39 @@ const UserRecommendationCard: React.FC<UserRecommendationCardProps> = ({
   pic,
   followedByMe,
 }) => {
-  const { mutate: followMutate } = useFollow({ username: myId, whoToFollow: userId });
-  const { mutate: unfollowMutate } = useUnfollow({ username: myId, whoToUnfollow: userId });
+  const { mutate: followMutate, isSuccess: followIsSuccess } = useFollow({
+    username: myId,
+    whoToFollow: userId,
+  });
+  const { mutate: unfollowMutate, isSuccess: unfollowIsSuccess } = useUnfollow({
+    username: myId,
+    whoToUnfollow: userId,
+  });
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (followIsSuccess) {
+      queryClient.invalidateQueries(['getUserRecommendation']);
+      showNotification({
+        message: `You are now following ${userId}`,
+        radius: 'sm',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+    }
+  }, [followIsSuccess]);
+
+  useEffect(() => {
+    if (unfollowIsSuccess) {
+      queryClient.invalidateQueries(['getUserRecommendation']);
+      showNotification({
+        message: `Unfollowed ${userId}`,
+        radius: 'sm',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+    }
+  }, [unfollowIsSuccess]);
 
   return (
     <Card radius={'md'} style={{ width: '100%', backgroundColor: 'transparent' }} p={3}>

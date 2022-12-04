@@ -6,6 +6,7 @@ import { Dashboard, FileText, Home, Search } from 'tabler-icons-react';
 import { Header } from '../components/Header/HeaderNew';
 import { IconSearch } from '@tabler/icons';
 import { User } from '../hooks/auth/useGetUserDetail';
+import { useMediaQuery } from '@mantine/hooks';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -62,6 +63,7 @@ const data = {
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children, style, user }) => {
   const theme = useMantineTheme();
+  const matches = useMediaQuery('(max-width: 700px)', true, { getInitialValueInEffect: false });
 
   return (
     <AppShell
@@ -80,7 +82,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, style, user }) => {
       }
     >
       <Center>
-        <div style={{ width: '80%' }}>{children}</div>
+        <div style={{ width: !matches ? "80%" : "100%" }}>{children}</div>
       </Center>
     </AppShell>
   );

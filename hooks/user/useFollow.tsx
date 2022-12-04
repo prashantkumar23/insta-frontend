@@ -33,46 +33,46 @@ function useFollow({ username, whoToFollow }: IFollowUser) {
     },
     {
       retry: false,
-      onMutate: async () => {
-        // console.log("UR", ur)
+      // onMutate: async () => {
+      //   // console.log("UR", ur)
 
-        await queryClient.cancelQueries(['follow', whoToFollow]);
+      //   await queryClient.cancelQueries(['follow', whoToFollow]);
 
-        const userRecommendation = queryClient.getQueryData(['getUserRecommendation']);
+      //   const userRecommendation = queryClient.getQueryData(['getUserRecommendation']);
 
-        queryClient.setQueryData(['getUserRecommendation'], (prev: any) => {
-          console.log(prev)
-          const userR: IGetUserRecommedationResponseGraphQL = { ...prev };
+      //   queryClient.setQueryData(['getUserRecommendation'], (prev: any) => {
+      //     console.log(prev)
+      //     const userR: IGetUserRecommedationResponseGraphQL = { ...prev };
 
-          if (userR.users) {
-            let userNeedToUpdate = userR.users.find((u) => u._id === whoToFollow);
-            let userNeedToUpdateIndex = userR.users.findIndex((u) => u._id === whoToFollow);
+      //     if (userR.users) {
+      //       let userNeedToUpdate = userR.users.find((u) => u._id === whoToFollow);
+      //       let userNeedToUpdateIndex = userR.users.findIndex((u) => u._id === whoToFollow);
 
-            //@ts-ignore
-            const userNeedToUpdate2 = {
-              ...userNeedToUpdate,
-              followedByMe: true,
-            };
-            //@ts-ignore
-            userR.users[userNeedToUpdateIndex] = userNeedToUpdate2;
-          }
+      //       //@ts-ignore
+      //       const userNeedToUpdate2 = {
+      //         ...userNeedToUpdate,
+      //         followedByMe: true,
+      //       };
+      //       //@ts-ignore
+      //       userR.users[userNeedToUpdateIndex] = userNeedToUpdate2;
+      //     }
 
 
 
 
  
-          console.log('UR 2', userR);
-          return userR;
-        });
+      //     console.log('UR 2', userR);
+      //     return userR;
+      //   });
 
-        return { userRecommendation };
-      },
-      onError: (err, newTodo, context) => {
-        queryClient.setQueryData(['getUserRecommendation'], context?.userRecommendation);
-      },
-      onSettled: (data: any, error: unknown, variables: void, context: any) => {
-        queryClient.invalidateQueries(['getUserRecommendation']);
-      },
+      //   return { userRecommendation };
+      // },
+      // onError: (err, newTodo, context) => {
+      //   queryClient.setQueryData(['getUserRecommendation'], context?.userRecommendation);
+      // },
+      // onSettled: (data: any, error: unknown, variables: void, context: any) => {
+      //   queryClient.invalidateQueries(['getUserRecommendation']);
+      // },
     }
   );
 }

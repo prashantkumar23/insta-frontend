@@ -1,5 +1,4 @@
-import { forwardRef, Fragment, useContext } from 'react';
-import { IconChevronRight } from '@tabler/icons';
+import { forwardRef, Fragment, useContext, useState } from 'react';
 import {
   Group,
   Avatar,
@@ -10,19 +9,14 @@ import {
   useMantineTheme,
   Button,
 } from '@mantine/core';
-
-import { NextLink } from '@mantine/next';
+import CreatePostDialog from './HomePage/CreatePost';
 import {
-  Heart,
   Logout,
-  Message,
-  PlayerPause,
-  Settings,
-  Star,
-  SwitchHorizontal,
-  Trash,
+  Polaroid,
+
 } from 'tabler-icons-react';
 import { AccountContext } from '../context/Accounts';
+import { User } from '../hooks/auth/useGetUserDetail';
 
 interface UserButtonProps extends React.ComponentPropsWithoutRef<'button'> {
   image: string;
@@ -55,67 +49,47 @@ const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
   )
 );
 
-function MenuComponent() {
+function MenuComponent(user: User) {
   const theme = useMantineTheme();
+  const [opened, setOpened] = useState(false);
 
   return (
     <Fragment>
       {/* {user ? ( */}
-        <Group position="center">
-          <NextLink passHref href="/me" style={{ textDecoration: 'none' }}>
-            <Menu
-              withArrow
-              trigger="hover"
-              transition="pop-bottom-left"
-              transitionDuration={150}
-              width={270}
-              radius={'lg'}
-              offset={1}
+      <CreatePostDialog opened={opened} setOpened={setOpened} user={user} />
+      <Group position="center">
+        <Menu
+          withArrow
+          trigger="hover"
+          transition="pop-bottom-left"
+          transitionDuration={150}
+          width={270}
+          radius={'lg'}
+          offset={1}
+        >
+          <Menu.Target>
+            <Avatar src={user.pic} style={{ borderRadius: '50%' }} size={35} />
+          </Menu.Target>
+          <Menu.Dropdown>
+            <Menu.Item
+              icon={<Polaroid size={14} color={theme.colors.grape[6]} />}
+              onClick={() => setOpened(true)}
             >
-              <Menu.Target>
-                <UserButton
-                  image="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=255&q=80"
-                  name="Harriette Spoonlicker"
-                  email="hspoonlicker@outlook.com"
-                />
-              </Menu.Target>
-              <Menu.Dropdown>
-                <NextLink passHref href="/login" style={{ textDecoration: 'none' }}>
+              Create post
+            </Menu.Item>
+            {/* <NextLink passHref href="/login" style={{ textDecoration: 'none' }}>
                   <Menu.Item icon={<Heart size={14} color={theme.colors.red[6]} />}>
                     Liked posts
                   </Menu.Item>
                 </NextLink>
 
-                <NextLink passHref href="/login" style={{ textDecoration: 'none' }}>
-                  <Menu.Item icon={<Star size={14} color={theme.colors.yellow[6]} />}>
-                    Saved posts
-                  </Menu.Item>
-                </NextLink>
-
-                <NextLink passHref href="/login" style={{ textDecoration: 'none' }}>
-                  <Menu.Item icon={<Message size={14} color={theme.colors.blue[6]} />}>
-                    Your comments
-                  </Menu.Item>
-                </NextLink>
-
-                <Menu.Label>Settings</Menu.Label>
-                <NextLink passHref href="/login" style={{ textDecoration: 'none' }}>
-                  <Menu.Item icon={<Settings size={14} />}>Account settings</Menu.Item>
-                </NextLink>
-                <Menu.Item icon={<Logout size={14} />}>Logout</Menu.Item>
-
-                {/* <Divider /> */}
-
-                {/* <Menu.Label>Danger zone</Menu.Label>
-            <NextLink passHref href="/login" style={{ textDecoration: 'none' }}>
-              <Menu.Item color="red" icon={<Trash size={14} />}>
-                Delete account
-              </Menu.Item>
-            </NextLink> */}
-              </Menu.Dropdown>
-            </Menu>
-          </NextLink>
-        </Group>
+             */}
+            <Menu.Item icon={<Logout size={14} />} color={theme.colors.red[6]}>
+              Logout
+            </Menu.Item>
+          </Menu.Dropdown>
+        </Menu>
+      </Group>
     </Fragment>
   );
 }

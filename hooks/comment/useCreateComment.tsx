@@ -45,62 +45,62 @@ function useCreateComment(input: ICreateComment) {
   return useMutation(
     ['createComment', input.postId],
     async () => {
-      const data = await graphQLClientForFrontend.request(mutation, variables);
-      return data.createComment;
+      const data: ICreateComment = await graphQLClientForFrontend.request(mutation, variables).then(data => data.createComment);
+      return data;
     },
     {
       retry: false,
-      onMutate: async (commentAndPost: any) => {
-        await queryClient.cancelQueries(['createComment', input.postId]);
-        console.log(commentAndPost)
-        let res: any;
+      // onMutate: async (commentAndPost: any) => {
+      //   await queryClient.cancelQueries(['createComment', input.postId]);
+      //   console.log(commentAndPost)
+      //   let res: any;
 
-        if (commentAndPost.route.includes('/p')) {
-          const previousPost = queryClient.getQueryData(['getPost', commentAndPost.postId]);
+      //   if (commentAndPost.route.includes('/p')) {
+      //     const previousPost = queryClient.getQueryData(['getPost', commentAndPost.postId]);
 
-          queryClient.setQueryData(['getPost', commentAndPost.postId], (prev: any) => {
-            const post: SpecificPost = { ...prev };
+      //     queryClient.setQueryData(['getPost', commentAndPost.postId], (prev: any) => {
+      //       const post: SpecificPost = { ...prev };
 
-            // @ts-ignore
-            post.commentIds.unshift(commentAndPost.userComment);
-            const updatedPost: SpecificPost = {
-              ...post,
-              commentIds: post.commentIds,
-              comments: post.comments + 1,
-            };
+      //       // @ts-ignore
+      //       post.commentIds.unshift(commentAndPost.userComment);
+      //       const updatedPost: SpecificPost = {
+      //         ...post,
+      //         commentIds: post.commentIds,
+      //         comments: post.comments + 1,
+      //       };
 
-            return updatedPost;
-          });
-          res = { previousPost, queryName: 'getPost' };
-        } else {
-          const previousPost = queryClient.getQueryData(['getFeedPost']);
+      //       return updatedPost;
+      //     });
+      //     res = { previousPost, queryName: 'getPost' };
+      //   } else {
+      //     const previousPost = queryClient.getQueryData(['getFeedPost']);
 
-          queryClient.setQueryData(['getFeedPost'], (prev: any) => {
-            let feedPost: FeedPost[] = [...prev];
-            const indexOfCommentedPost = feedPost.findIndex(
-              (p: FeedPost) => p.id === commentAndPost.postId
-            );
-            let commentedPost = feedPost.find((p) => p.id === commentAndPost.postId);
-            let updatedCommentedPost = {
-              ...commentedPost,
-              comments: commentedPost!.comments + 1,
-            };
-            // @ts-ignore
-            feedPost[indexOfCommentedPost] = updatedCommentedPost!;
-            return feedPost;
-          });
+      //     queryClient.setQueryData(['getFeedPost'], (prev: any) => {
+      //       let feedPost: FeedPost[] = [...prev];
+      //       const indexOfCommentedPost = feedPost.findIndex(
+      //         (p: FeedPost) => p.id === commentAndPost.postId
+      //       );
+      //       let commentedPost = feedPost.find((p) => p.id === commentAndPost.postId);
+      //       let updatedCommentedPost = {
+      //         ...commentedPost,
+      //         comments: commentedPost!.comments + 1,
+      //       };
+      //       // @ts-ignore
+      //       feedPost[indexOfCommentedPost] = updatedCommentedPost!;
+      //       return feedPost;
+      //     });
 
-          res = { previousPost, queryName: 'getFeedPost' };
-        }
+      //     res = { previousPost, queryName: 'getFeedPost' };
+      //   }
 
-        return res;
-      },
-      onError: (err, data, context) => {
-        queryClient.setQueryData([`${context.queryName}`], context?.previousPost);
-      },
-      onSettled: (data: any, error: unknown, variables: any, context: any) => {
-        queryClient.invalidateQueries([`${context.queryName}`]);
-      },
+      //   return res;
+      // },
+      // onError: (err, data, context) => {
+      //   queryClient.setQueryData([`${context.queryName}`], context?.previousPost);
+      // },
+      // onSettled: (data: any, error: unknown, variables: any, context: any) => {
+      //   queryClient.invalidateQueries([`${context.queryName}`]);
+      // },
     }
   );
 }

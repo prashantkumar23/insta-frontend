@@ -13,8 +13,16 @@ import {
   Center,
   ActionIcon,
   createStyles,
+  useMantineTheme,
+  Title,
 } from '@mantine/core';
-import { IconBrandGoogle, IconBrandFacebook, IconBrandTwitter, IconX } from '@tabler/icons';
+import {
+  IconBrandGoogle,
+  IconBrandFacebook,
+  IconBrandTwitter,
+  IconX,
+  IconCheck,
+} from '@tabler/icons';
 import Link from 'next/link';
 
 import { dehydrate, QueryClient } from '@tanstack/react-query';
@@ -27,13 +35,13 @@ import { AccountContext } from '../context/Accounts';
 const useStyles = createStyles((theme) => ({
   wrapper: {
     backgroundSize: 'cover',
-    backgroundImage: 'url(https://cdn.wallpapersafari.com/86/75/VrsOQC.jpg)',
+    backgroundImage: 'url(https://www.pixelstalk.net/wp-content/uploads/2016/04/Images-free-abstract-minimalist-wallpaper-HD.jpg)',
   },
 }));
 
 function LoginPage(props: any) {
   const { classes } = useStyles();
-
+  const theme = useMantineTheme();
   const context = useContext(AccountContext);
   if (!context) return null;
   const { user, setUser } = context;
@@ -47,8 +55,8 @@ function LoginPage(props: any) {
     },
 
     validate: {
-      // email: (val) => /^\S+@\S+$/.test(val) && 'Invalid email',
-      // password: (val) => val.length >= 8 && 'Password should include at least 6 characters',
+      username: (val) => val.length <=3 && 'Username/Email is invalid',
+      password: (val) => val.length < 8 && 'Password should include at least 6 characters',
     },
   });
 
@@ -63,18 +71,30 @@ function LoginPage(props: any) {
     }
   }, [isError]);
 
-  if (isSuccess) {
-    // showNotification({
-    //   message: data.login.message,
-    //   radius: 'sm',
-    //   color: 'green',
-    //   icon: <IconX size={18} />,
-    // });
+  useEffect(() => {
+    if (isSuccess) {
+      const {
+        login: { isSuccess, message },
+      } = data;
 
-    // if (data.login.isSuccess) {
-    //   router.replace('/');
-    // }
-  }
+      if (isSuccess) {
+        showNotification({
+          message: message,
+          radius: 'sm',
+          color: 'green',
+          icon: <IconCheck size={18} />,
+        });
+        router.replace('/');
+      } else {
+        showNotification({
+          message: message,
+          radius: 'sm',
+          color: 'red',
+          icon: <IconX size={18} />,
+        });
+      }
+    }
+  }, [isSuccess]);
 
   return (
     <div className={classes.wrapper}>
@@ -87,23 +107,26 @@ function LoginPage(props: any) {
           minHeight: '100vh',
         }}
       >
-        <Paper shadow="xl" radius="xl" p="xl" withBorder style={{ width: '100%' }}>
+        <Paper shadow={undefined} radius="lg" p="xl" withBorder style={{ width: '100%' }}>
           <Center mb={20}>
-            <Text size="lg" weight={500}>
-              Welcome back to Insta Clone
-            </Text>
+            <Title>
+              Welcome Back!
+            </Title>
           </Center>
 
           <form onSubmit={form.onSubmit(() => mutate())}>
             <Stack spacing={20}>
               <TextInput
                 label="Username"
-                placeholder="Enter your username/email"
+                placeholder="Enter your username or email"
                 value={form.values.username}
                 onChange={(event) => form.setFieldValue('username', event.currentTarget.value)}
                 radius="xl"
-                disabled={isLoading}
-              />
+                disabled={isLoading || data?.login.isSuccess}
+                error={form.errors.username && "Username/Email is invalid"}
+      
+/>
+
 
               <PasswordInput
                 label="Password"
@@ -112,39 +135,63 @@ function LoginPage(props: any) {
                 onChange={(event) => form.setFieldValue('password', event.currentTarget.value)}
                 error={form.errors.password && 'Password should include at least 6 characters'}
                 radius="xl"
-                disabled={isLoading}
+                disabled={isLoading || data?.login.isSuccess}
               />
-              <Link passHref href="/forgot">
+              <div style={{justifyContent: "flex-end", display: "flex"}}>
+              <Link passHref href="/forgot" >
                 <Anchor
                   component="button"
                   type="button"
                   color="dimmed"
                   size="xs"
-                  style={{ textAlign: 'end' }}
-                  disabled={isLoading}
+                  style={{ textAlign: 'end',  width: "max-content", textDecorationLine: "none" }}
+                  disabled={isLoading || data?.login.isSuccess}
                 >
                   Forgot your password?
                 </Anchor>
               </Link>
+              </div>
+            
             </Stack>
 
             <Group position="apart" mt="xl">
-              <Link passHref href="/register">
-                <Anchor
-                  component="button"
-                  type="button"
-                  color="dimmed"
-                  size="xs"
-                  disabled={isLoading}
-                >
-                  Don't have an account? Register
-                </Anchor>
-              </Link>
-              <Button type="submit" loading={isLoading} radius="xl">
+              <Anchor
+                component="button"
+                type="button"
+                color="dimmed"
+                size="xs"
+                disabled={isLoading || data?.login.isSuccess}
+                style={{ textDecoration: 'none' }}
+              >
+                Don't have an account?{' '}
+                <Link passHref href="/register">
+                  <Text
+                    style={{
+                      display: 'inline',
+                      color: theme.primaryColor,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Register
+                  </Text>
+                </Link>
+              </Anchor>
+              <Button
+                type="submit"
+                loading={isLoading}
+                disabled={data?.login.isSuccess}
+                radius="xl"
+              >
                 Login
               </Button>
             </Group>
           </form>
+
+          {data?.login.isSuccess ? (
+            <Text fz="xs" align="center">
+              Please wait redirecting...
+            </Text>
+          ) : null}
         </Paper>
       </Container>
     </div>

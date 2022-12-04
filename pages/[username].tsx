@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import {
   Card,
   Container,
@@ -18,65 +18,90 @@ import {
 import AppLayout from '../layout/AppLayout';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { GetServerSidePropsContext, NextPage } from 'next';
-import { useMediaQuery } from '@mantine/hooks';
 import { IconHeart, IconLogout, IconMessage2 } from '@tabler/icons';
+import { useRouter } from 'next/router';
+
 import getUserDetail, { IGetUserDetail } from '../hooks/auth/useGetUserDetail';
 import { getToken } from '../utility/gettoken';
+import useGetFeedPost, { FeedPost } from '../hooks/post/useGetFeedPost';
 
-const Username: NextPage = ({ user }: any) => {
-  const theme = useMantineTheme();
-  const [opened, setOpened] = useState(false);
-  console.log('USer', user);
-  const matches = useMediaQuery('(min-width: 950px)', false);
+const LIMIT = 100;
 
-  const FeedCard = () => (
+const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
+  const router = useRouter();
+  return (
     <Card
-      radius={'lg'}
+      radius={'xs'}
       style={{ backgroundColor: 'transparent' }}
-      p="sm"
-      onClick={() => setOpened(true)}
+      // p="sm"
+      // onClick={() => setOpened(true)}
+      m={5}
+      p={0}
     >
       <Image
         // width={250}
         height={300}
-        radius={'xl'}
-        src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&w=1000&q=80"
+        radius={'md'}
+        src={imageUrl}
         onClick={() => console.log('Card')}
         style={{ cursor: 'pointer' }}
       />
-      <Group mt={20} pl={5} spacing={10} style={{ cursor: 'pointer' }}>
-        <Group spacing={4}>
-          <IconHeart size={22} stroke={1} />
-          <Text color="dimmed">56k</Text>
+      <Group mt={10} pl={5} spacing={10} style={{ cursor: 'pointer' }}>
+        <Group spacing={4} onClick={() => router.push(`/p/${id}`)}>
+          <IconHeart size={18} stroke={1} />
+          <Text color="dimmed" size="xs">
+            {likes}
+          </Text>
         </Group>
-        <Group spacing={4}>
-          <IconMessage2 size={22} stroke={1} />
-          <Text color="dimmed">45</Text>
+        <Group spacing={4} onClick={() => router.push(`/p/${id}`)}>
+          <IconMessage2 size={18} stroke={1} />
+          <Text color="dimmed" size="xs">
+            {comments}
+          </Text>
         </Group>
       </Group>
     </Card>
   );
+};
+
+const Username: NextPage = ({ user }: any) => {
+  const theme = useMantineTheme();
+  const [opened, setOpened] = useState(false);
+  const { refetch, data, isSuccess } = useGetFeedPost({ userId: user.id, limit: LIMIT, skip: 0 });
+  // console.log('USer', user);
+
+  useEffect(() => {
+    refetch();
+  }, []);
+
+  useEffect(() => {
+    // if (isSuccess) console.log('Post ************', data);
+  }, [isSuccess]);
 
   return (
     <Fragment>
       <AppLayout user={user}>
-        <Grid mt={40}>
-          {matches ? (
-            <Grid.Col span={3}>
-              <Stack style={{ textAlign: 'center' }} spacing={3}>
-                <Avatar
-                  style={{ margin: 'auto' }}
-                  size="xl"
-                  radius={'xl'}
-                  src="https://images.unsplash.com/photo-1511367461989-f85a21fda167?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZXxlbnwwfHwwfHw%3D&w=1000&q=80"
-                />
-                <Text weight={700} size="xl">
-                  {user?.name}
-                </Text>
-                <Text color={'dimmed'} size="sm">
-                  @{user?.username}
-                </Text>
+        <Stack>
+          <Center style={{}}>
+            <Grid style={{ textAlign: 'center', width: '65%' }}>
+              <Grid.Col xs={12} md={6}>
+                <Stack spacing={0}>
+                  <Avatar
+                    style={{ margin: 'auto', borderRadius: '50%' }}
+                    size="xl"
+                    radius={'xl'}
+                    src={user.pic}
+                  />
+                  <Text color={'dimmed'} size="sm" mt={5}>
+                    @{user?.username}
+                  </Text>
+                  <Text weight={700} size="xl">
+                    {user?.name}
+                  </Text>
+                </Stack>
+              </Grid.Col>
 
+              <Grid.Col xs={12} md={6}>
                 <Grid justify={'center'} mt={20}>
                   <Grid.Col span={4}>
                     <Stack spacing={0}>
@@ -115,33 +140,39 @@ const Username: NextPage = ({ user }: any) => {
                     Follow
                   </Button>
                 </div>
+              </Grid.Col>
 
-                <Divider mt={40} />
+              {/* <Divider mt={40} /> */}
 
-                <Stack>
+              {/* <Stack>
                   <Button leftIcon={<IconLogout color="grey" />} variant="subtle" mt={20}>
                     <Text color={'dimmed'} align="left">
                       Logout
                     </Text>
                   </Button>
-                </Stack>
-              </Stack>
-            </Grid.Col>
-          ) : null}
-
-          <Grid.Col span={!matches ? 12 : 9} pl={50}>
-            <Title mb={20} ml={20}>
-              Feed
-            </Title>
-            <Grid justify={'flex-start'}>
-              {[1].map((item, index) => (
-                <Grid.Col span={4} md={6} lg={4} sm={6} key={item + index}>
-                  <FeedCard />
-                </Grid.Col>
-              ))}
+                </Stack> */}
             </Grid>
-          </Grid.Col>
-        </Grid>
+          </Center>
+
+          {/* ) : null} */}
+
+          {/* <Grid.Col span={!matches ? 12 : 9} pl={50}> */}
+          {/* <Title mb={20} ml={20}>
+            Feed
+          </Title> */}
+          <Divider />
+          <Grid justify={'flex-start'} gutter={0}>
+            {data?.posts &&
+              data.posts.map((item, index) => {
+                return (
+                  <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={item.id}>
+                    <FeedCard {...item} />
+                  </Grid.Col>
+                );
+              })}
+          </Grid>
+        </Stack>
+        {/* </Grid> */}
       </AppLayout>
       <Modal
         overlayColor={theme.colorScheme === 'dark' ? theme.colors.dark[9] : theme.colors.gray[2]}
