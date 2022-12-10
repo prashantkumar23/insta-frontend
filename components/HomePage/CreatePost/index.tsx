@@ -1,6 +1,7 @@
 import { Button, Input, Modal, Stack, Image, Textarea } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconCheck, IconX } from '@tabler/icons';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Heart } from 'tabler-icons-react';
 import { User } from '../../../hooks/auth/useGetUserDetail';
@@ -16,6 +17,7 @@ const CreatePost = ({ opened, setOpened, user }: ICreatePostDialog) => {
   const [selectedFile, setSelectedFile] = useState<File>();
   const [preview, setPreview] = useState<any>(null);
   const [caption, setCaption] = useState('');
+  const queryClient = useQueryClient();
 
   const { mutate, isLoading, data, isSuccess } = useCreatePost({
     userId: user.id,
@@ -26,6 +28,7 @@ const CreatePost = ({ opened, setOpened, user }: ICreatePostDialog) => {
 
   useEffect(() => {
     if (data && data.isSuccess) {
+      queryClient.refetchQueries(["getFeedPost"])
       showNotification({
         message: data!.message,
         radius: 'sm',

@@ -3,7 +3,6 @@ import {
   Button,
   Card,
   Center,
-  Container,
   Grid,
   Group,
   Paper,
@@ -13,14 +12,13 @@ import {
   Image,
   ActionIcon,
   TextInput,
-  Divider,
 } from '@mantine/core';
-import { dehydrate, QueryClient } from '@tanstack/react-query';
+import { dehydrate, QueryClient, useQueryClient } from '@tanstack/react-query';
 import { GetServerSidePropsContext, NextPage } from 'next';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 
-import PostCard, { ReadMoreOrLess } from '../../components/Cards/PostCard';
+import { ReadMoreOrLess } from '../../components/Cards/PostCard';
 import getUserDetail, { IGetUserDetail } from '../../hooks/auth/useGetUserDetail';
 import useGetPost, {
   IGetPostInDetailServerResponse,
@@ -29,7 +27,6 @@ import useGetPost, {
 import AppLayout from '../../layout/AppLayout';
 import { getToken } from '../../utility/gettoken';
 import useDeleteComment from '../../hooks/comment/useDeleteComment';
-import { flushSync } from 'react-dom';
 import {
   IconArrowUpRight,
   IconCheck,
@@ -37,6 +34,7 @@ import {
   IconHeart,
   IconMessage2,
   IconSend,
+  IconTrash,
 } from '@tabler/icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -45,38 +43,92 @@ import useLikePost from '../../hooks/post/useLikePost';
 import useUnlikePost from '../../hooks/post/useUnlikePost';
 import getPostInDetails from '../../hooks/post/useGetPost';
 import { showNotification } from '@mantine/notifications';
-import useCreateComment from '../../hooks/comment/useCreateComment';
+import useCreateCommentOnPostPage from '../../hooks/comment/createComment/useCreateCommentOnPostPage';
 dayjs.extend(relativeTime);
 
-const PostPage: NextPage = (props) => {
+const CommentSection = memo(({ PostData }: { PostData: SpecificPost }) => {
+  return (
+    <div style={{ maxHeight: '50vh' }}>
+      {/* {PostData.commentIds.length === 0 && (
+    <div style={{ backgroundColor: 'lightpink', height: '100%' }}>
+      <Text size="xs" color={'gray'} fs="italic" align="center">
+        No one is commented so far
+      </Text>
+    </div>
+  )} */}
+      {PostData.commentIds.length > 0 && (
+        <ScrollArea style={{ height: '50vh' }} offsetScrollbars scrollbarSize={6}>
+          {PostData.commentIds.length > 0 &&
+            PostData.commentIds.map(
+              ({ _id, comment, whoCommented: { username, _id: userId, pic } }) => (
+                <Stack key={_id} spacing={6} mb={10} pr={10} pt={10}>
+                  <Group position="apart">
+                    <Group spacing={8}>
+                      <Avatar src={pic} size={20} radius="xl" />
+                      <Text size={'xs'}>{username}</Text>
+                      <Text size="xs" fw={'600'}>
+                        {comment}
+                      </Text>
+                    </Group>
+                    {/* <ActionIcon
+              // onClick={() => {
+              //   if (PostData!.wasLikeByMe) {
+              //     // unlikePost(PostData);
+              //   } else {
+              //     // likePost(PostData);
+              //   }
+              // }}
+              >
+                <IconHeart
+                  size={16}
+                  // fill={`${PostData!.wasLikeByMe ? 'red' : 'white'}`}
+                  stroke={'1px'}
+                  // style={{
+                  //   color: PostData!.wasLikeByMe ? 'red' : 'black',
+                  // }}
+                />
+              </ActionIcon> */}
+                    {/* {userId === props.user.id ? (
+                <ActionIcon onClick={() => deleteMutation({commenId: _id, postId: PostData._id})}>
+                  <IconTrash size={16} stroke={'1px'} />
+                </ActionIcon>
+              ) : null} */}
+                  </Group>
+
+                  {/* <Text color="dimmed" size={10} ml={25}>
+              {PostData?.likes} Likes
+            </Text> */}
+                </Stack>
+              )
+            )}
+        </ScrollArea>
+      )}
+    </div>
+  );
+});
+
+const PostPage: NextPage = (props: any) => {
   const router = useRouter();
   const { postId } = router.query;
-  const [PostData, setPostData] = useState<SpecificPost | undefined>(undefined);
+  const queryClient = useQueryClient();
+  //@ts-ignore
+  const PostData: SpecificPost | undefined = queryClient.getQueryData(['getPost', props.postId])
+    .post as SpecificPost;
   const [comment, setComment] = useState('');
   const [commentIdToBeDeleted, setCommentIdToBeDeleted] = useState('');
+
   const { mutate: deleteMutation } = useDeleteComment({
     commentId: commentIdToBeDeleted,
     postId: postId as string,
   });
 
-  useEffect(() => {
-    //@ts-ignore
-    if (props.post) {
-      //@ts-ignore
-      setPostData(JSON.parse(props.post).post);
-    }
-  }, [props]);
-
-  //@ts-ignore
   const { mutate: likePost, data: likeData } = useLikePost({
     postId: PostData ? PostData._id : '',
-    //@ts-ignore
     userId: props.user.id,
   });
-  //@ts-ignore
+
   const { mutate: unlikePost, data: unlikeData } = useUnlikePost({
     postId: PostData ? PostData._id : '',
-    //@ts-ignore
     userId: props.user.id,
   });
 
@@ -85,7 +137,7 @@ const PostPage: NextPage = (props) => {
     data: commentData,
     isSuccess: commentDataIsSuccess,
     isLoading,
-  } = useCreateComment({
+  } = useCreateCommentOnPostPage({
     comment,
     postId: PostData ? PostData._id : '',
     //@ts-ignore
@@ -104,6 +156,20 @@ const PostPage: NextPage = (props) => {
       });
     }
   }, [commentDataIsSuccess]);
+
+  const handleCommentPosting = () => {
+    setComment('');
+    commentPost({
+      comment,
+      postId: PostData ? PostData._id : '',
+      whoCommented: {
+        name: props.user.name,
+        pic: props.user.pic,
+        username: props.user.username,
+        _id: props.user.id,
+      },
+    });
+  };
 
   // const onImgLoad = ({ target: img }) => {
   //   console.log("Image h and w", img)
@@ -183,10 +249,10 @@ const PostPage: NextPage = (props) => {
                       >
                         <IconHeart
                           size={16}
-                          fill={`${PostData!.wasLikeByMe ? 'red' : 'white'}`}
+                          fill={`${!PostData!.wasLikeByMe ? 'red' : 'white'}`}
                           stroke={'1px'}
                           style={{
-                            color: PostData!.wasLikeByMe ? 'red' : 'black',
+                            color: !PostData!.wasLikeByMe ? 'red' : 'black',
                           }}
                         />
                       </ActionIcon>
@@ -220,7 +286,7 @@ const PostPage: NextPage = (props) => {
                 </Grid>
 
                 <Text color="dimmed" size={10} m={0} p={0}>
-                  {dayjs(PostData.createdAt).fromNow()}
+                  {dayjs(new Date(parseInt(PostData.createdAt))).fromNow()}
                 </Text>
 
                 {/* Caption */}
@@ -228,11 +294,13 @@ const PostPage: NextPage = (props) => {
 
                 {/* Comment Box */}
                 <TextInput
-                  radius="xl"
+                  radius="lg"
                   size="xs"
                   mt={0}
-                  maxLength={100}
-                  onKeyDown={(e) => (e.key === 'Enter' ? commentPost() : undefined)}
+                  maxLength={200}
+                  onKeyDown={(e) => {
+                    e.key === 'Enter' ? handleCommentPosting() : undefined;
+                  }}
                   rightSection={
                     <Button
                       mr={20}
@@ -244,69 +312,21 @@ const PostPage: NextPage = (props) => {
                         backgroundColor: 'transparent',
                         '&:disabled': { backgroundColor: 'transparent' },
                       }}
-                      onClick={() => commentPost()}
+                      onClick={() => {
+                        handleCommentPosting();
+                      }}
                       disabled={isLoading || comment.trim().length === 0}
                     >
                       Post
                     </Button>
                   }
-                     //@ts-ignore
+                  //@ts-ignore
                   placeholder={`comment as ${props.user.username}`}
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                 />
 
-                <div>
-                  {/* {PostData.commentIds.length === 0 && (
-                      <div style={{ backgroundColor: 'lightpink', height: '100%' }}>
-                        <Text size="xs" color={'gray'} fs="italic" align="center">
-                          No one is commented so far
-                        </Text>
-                      </div>
-                    )} */}
-                  {PostData.commentIds.length > 0 && (
-                    <ScrollArea style={{ height: '50vh' }} offsetScrollbars scrollbarSize={6}>
-                      {PostData.commentIds.length > 0 &&
-                        PostData.commentIds.map(
-                          ({ _id, comment, whoCommented: { username, _id: userId, pic } }) => (
-                            <Stack key={_id} spacing={6} mb={10} pr={10} pt={10}>
-                              <Group position="apart">
-                                <Group spacing={8}>
-                                  <Avatar src={pic} size={20} radius="xl" />
-                                  <Text size={'xs'}>{username}</Text>
-                                  <Text size="xs" fw={'600'}>
-                                    {comment}
-                                  </Text>
-                                </Group>
-                                <ActionIcon
-                                // onClick={() => {
-                                //   if (PostData!.wasLikeByMe) {
-                                //     // unlikePost(PostData);
-                                //   } else {
-                                //     // likePost(PostData);
-                                //   }
-                                // }}
-                                >
-                                  <IconHeart
-                                    size={16}
-                                    // fill={`${PostData!.wasLikeByMe ? 'red' : 'white'}`}
-                                    stroke={'1px'}
-                                    // style={{
-                                    //   color: PostData!.wasLikeByMe ? 'red' : 'black',
-                                    // }}
-                                  />
-                                </ActionIcon>
-                              </Group>
-
-                              <Text color="dimmed" size={10} ml={25}>
-                                {PostData?.likes} Likes
-                              </Text>
-                            </Stack>
-                          )
-                        )}
-                    </ScrollArea>
-                  )}
-                </div>
+                {PostData && <CommentSection PostData={PostData} />}
               </Stack>
             </Paper>
           </Center>
@@ -347,6 +367,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       dehydratedState: dehydrate(queryClient),
       user: fetchedUser!.user,
       post: fetchedPost.isSuccess ? JSON.stringify(fetchedPost) : null,
+      postId,
     },
   };
 }

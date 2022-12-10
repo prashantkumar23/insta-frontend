@@ -14,7 +14,7 @@ function useLikePost({ postId, userId }: ILikePost) {
 
   const variables = {
     postId,
-    userId
+    userId,
   };
 
   const mutation = gql`
@@ -35,9 +35,14 @@ function useLikePost({ postId, userId }: ILikePost) {
       retry: false,
       onMutate: async (post: FeedPost) => {
         await queryClient.cancelQueries(['likePost', postId]);
+
         const previousPost = queryClient.getQueryData(['getFeedPost']);
+
+        // console.log('Got this previous post', previousPost);
+
         queryClient.setQueryData(['getFeedPost'], (prev: any) => {
-          let feedPost: FeedPost[] = [...prev];
+          // console.log("Prev", prev)
+          let feedPost: FeedPost[] = [...prev.posts];
 
           const indexOfLikePost = feedPost.findIndex((p: FeedPost) => p.id === post.id);
 
@@ -46,20 +51,32 @@ function useLikePost({ postId, userId }: ILikePost) {
           let updatedlikedPost = {
             ...likedPost,
             wasLikeByMe: true,
-            likes: likedPost!.likes + 1
+            likes: likedPost!.likes + 1,
           };
           // @ts-ignore
           feedPost[indexOfLikePost] = updatedlikedPost!;
-          return feedPost;
+          // console.log('Feed POSt after setting like', feedPost);
+
+          const feedPostNew: any = {
+            count: prev.count,
+            isSuccess: prev.isSuccess,
+            message: prev.message,
+            posts: feedPost,
+          };
+
+          return feedPostNew;
         });
 
+        // console.log('Returning from OnMutate', previousPost);
         return { previousPost };
       },
-      onError: (err, newTodo, context) => {
-        queryClient.setQueryData(['getFeedPost'], context?.previousPost);
+      onError: (err: any, variables: any, context: any) => {
+        // console.log('Context in Error', context);
+        queryClient.setQueryData(['getFeedPost'], context);
       },
-      onSettled: () => {
-        queryClient.invalidateQueries(['getFeedPost']);
+      onSettled: (data: any, error: any, variables: any, context: any) => {
+        // console.log('Context in onSettled', context);
+        queryClient.invalidateQueries(['getFeedPost'], context);
       },
     }
   );

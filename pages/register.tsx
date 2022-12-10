@@ -1,3 +1,4 @@
+import { Fragment, useEffect, useState } from 'react';
 import {
   Paper,
   createStyles,
@@ -6,40 +7,27 @@ import {
   Button,
   Title,
   Text,
-  Anchor,
-  ActionIcon,
-  Center,
-  Code,
   Container,
   Group,
   Stepper,
-  Divider,
   useMantineTheme,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { NextLink } from '@mantine/next';
-import {
-  IconBrandGoogle,
-  IconBrandFacebook,
-  IconBrandTwitter,
-  IconMailOpened,
-  IconSignRight,
-  IconX,
-} from '@tabler/icons';
+import { IconX, IconCheck } from '@tabler/icons';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { showNotification } from '@mantine/notifications';
 import { ISignUpResult } from 'amazon-cognito-identity-js';
-import { Fragment, ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
-import useRegisterNew from '../hooks/auth/useRegisterNew';
+
 import useConfirmCodeNew from '../hooks/auth/useConfirmCodeNew';
+import useRegister from '../hooks/auth/useRegister';
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
     minHeight: 900,
     backgroundSize: 'cover',
-    backgroundImage:
-      'url(https://wallpaperaccess.com/full/459723.jpg)',
+    backgroundImage: 'url(https://wallpaperaccess.com/full/459723.jpg)',
   },
 
   form: {
@@ -118,22 +106,45 @@ export function Register() {
   });
 
   const {
-    refetch,
-    isFetching,
+    mutate,
     data: RegisterData,
     isSuccess,
     isError,
-    error,
-  } = useRegisterNew({
+    isLoading,
+  } = useRegister({
     name: form.values.name,
     email: form.values.email,
     username: form.values.username,
     password: form.values.password,
   });
 
-  if(isSuccess) {
-    console.log("Register Data", RegisterData)
-  }
+  useEffect(() => {
+    if (isSuccess) {
+      const { isSuccess, message } = RegisterData;
+
+      if (isSuccess) {
+        setActive((current) => {
+          if (form.validate().hasErrors) {
+            return current;
+          }
+          return current < 2 ? current + 1 : current;
+        });
+        showNotification({
+          message: message,
+          radius: 'sm',
+          color: 'green',
+          icon: <IconCheck size={18} />,
+        });
+      } else {
+        showNotification({
+          message: message,
+          radius: 'sm',
+          color: 'red',
+          icon: <IconX size={18} />,
+        });
+      }
+    }
+  }, [isSuccess, isError]);
 
   const {
     refetch: confirmRefetch,
@@ -142,23 +153,12 @@ export function Register() {
     isSuccess: isConfirmSuccess,
     isError: isConfirmError,
     error: confirmErrorMessage,
+    isLoading: isConfirmLoading,
   } = useConfirmCodeNew({ username: form.values.username, code: form.values.code });
 
-  if(isConfirmSuccess) {
-    console.log("Confirm Data", confirmData)
-  }
-
-  useEffect(() => {
-    if (isError) {
-      showNotification({
-        //@ts-ignore
-        message: error.message,
-        radius: 'xl',
-        color: 'red',
-        icon: <IconX size={18} />,
-      });
-    }
-  }, [isError]);
+  // if (isConfirmSuccess) {
+  //   console.log('Confirm Data', confirmData);
+  // }
 
   useEffect(() => {
     if (isConfirmError) {
@@ -173,17 +173,6 @@ export function Register() {
   }, [isConfirmError]);
 
   useEffect(() => {
-    if (isSuccess) {
-      setActive((current) => {
-        if (form.validate().hasErrors) {
-          return current;
-        }
-        return current < 2 ? current + 1 : current;
-      });
-    }
-  }, [isSuccess]);
-
-  useEffect(() => {
     if (isConfirmSuccess) {
       setActive((current) => {
         if (form.validate().hasErrors) {
@@ -194,17 +183,9 @@ export function Register() {
     }
   }, [isConfirmSuccess]);
 
-  // if (isSuccess) {
-  //   console.log('Register Data****************', RegisterData);
-  // }
-
-  // if (isConfirmSuccess) {
-  //   console.log('Confrim Data *************************', confirmData);
-  // }
-
   const nextStep = () => {
     if (active === 0 && !form.validate().hasErrors) {
-      refetch();
+      mutate();
     }
 
     if (active === 1 && form.values.code.trim().length === 6) {
@@ -226,18 +207,17 @@ export function Register() {
           >
             Welcome to Insta Clone!
           </Title>
-         
         </Container>
 
         <Container size={500}>
           <Paper shadow="none" radius="xl" p="xl" style={{ width: '100%' }}>
             <Stepper active={active} breakpoint="sm" size="xs">
               <Stepper.Step
-                // label="General Information"
-                // description="Enter the Details"
-                // icon={
-                //   <IconSignRight size={18} style={{ backgroundColor: 'green', color: 'white' }} />
-                // }
+              // label="General Information"
+              // description="Enter the Details"
+              // icon={
+              //   <IconSignRight size={18} style={{ backgroundColor: 'green', color: 'white' }} />
+              // }
               >
                 <TextInput
                   label="Name"
@@ -245,6 +225,7 @@ export function Register() {
                   {...form.getInputProps('name')}
                   radius="xl"
                   size="sm"
+                  disabled={isLoading}
                 />
                 <TextInput
                   mt="md"
@@ -252,6 +233,7 @@ export function Register() {
                   placeholder="Username"
                   {...form.getInputProps('username')}
                   radius="xl"
+                  disabled={isLoading}
                 />
                 <TextInput
                   mt="md"
@@ -260,6 +242,7 @@ export function Register() {
                   placeholder="Email"
                   {...form.getInputProps('email')}
                   radius="xl"
+                  disabled={isLoading}
                 />
                 <PasswordInput
                   mt="md"
@@ -267,26 +250,30 @@ export function Register() {
                   placeholder="Password"
                   {...form.getInputProps('password')}
                   radius="xl"
+                  disabled={isLoading}
                 />
               </Stepper.Step>
 
               <Stepper.Step
-                // label="Verify Email"
-                // description="Enter the code"
-                // icon={<IconMailOpened size={18} />}
-                // loading
+              // label="Verify Email"
+              // description="Enter the code"
+              // icon={<IconMailOpened size={18} />}
+              // loading
               >
                 <TextInput
                   label="Enter the code"
                   placeholder="Code"
                   {...form.getInputProps('code')}
                   radius="xl"
+                  disabled={isConfirmLoading}
                 />
               </Stepper.Step>
 
               <Stepper.Completed>
-                <Title>Congraulations! Welcome to this blog community</Title>
-                <Text>Now you can login</Text>
+                <Title align="center">Congraulations! Welcome to Insta Clone community</Title>
+                <Text align="center" mt={15} size="xs">
+                  Now you can login
+                </Text>
               </Stepper.Completed>
             </Stepper>
 
@@ -310,7 +297,7 @@ export function Register() {
                 </Fragment>
               )}
               {active !== 2 && (
-                <Button onClick={nextStep} radius="xl" loading={isFetching || isConfirmFetching}>
+                <Button onClick={nextStep} radius="xl" loading={isLoading || isConfirmFetching}>
                   Next step
                 </Button>
               )}
@@ -323,9 +310,10 @@ export function Register() {
               )}
             </Group>
 
-            <Text color="dimmed" size="xs" align="end" mt={15}>
-            Have an account?{' '}
-            <Link passHref href="/login">
+            {active === 0 && (
+              <Text color="dimmed" size="xs" align="end" mt={15}>
+                Have an account?{' '}
+                <Link passHref href="/login">
                   <Text
                     style={{
                       display: 'inline',
@@ -336,7 +324,8 @@ export function Register() {
                     Login
                   </Text>
                 </Link>
-          </Text>
+              </Text>
+            )}
           </Paper>
         </Container>
       </Paper>
@@ -346,9 +335,6 @@ export function Register() {
 
 export async function getStaticProps() {
   const queryClient = new QueryClient();
-
-  // await queryClient.prefetchQuery(['posts'], getPosts);
-  // await queryClient.prefetchQuery(['films'], getFilms);
 
   return {
     props: {

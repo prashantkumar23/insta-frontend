@@ -32,27 +32,27 @@ function useDeleteComment({ postId, commentId }: IDeleteComment) {
     },
     {
       retry: false,
-      onMutate: async (commentAndPost: any) => {
-        await queryClient.cancelQueries(['deleteComment', commentAndPost.postId]);
-        const previousPost = queryClient.getQueryData(['getPost', commentAndPost.postId]);
-        queryClient.setQueryData(['getPost', postId], (prev: any) => {
-          let post: SpecificPost = { ...prev };
-          const updatedPost: SpecificPost = {
-            ...post,
-            commentIds: post.commentIds.filter((c) => c._id !== commentAndPost.commentId),
-            comments: post.comments - 1,
-          };
-          return updatedPost;
-        });
+      // onMutate: async (commentAndPost: any) => {
+      //   await queryClient.cancelQueries(['deleteComment', commentAndPost.postId]);
+      //   const previousPost = queryClient.getQueryData(['getPost', commentAndPost.postId]);
+      //   queryClient.setQueryData(['getPost', postId], (prev: any) => {
+      //     let post: SpecificPost = { ...prev };
+      //     const updatedPost: SpecificPost = {
+      //       ...post,
+      //       commentIds: post.commentIds.filter((c) => c._id !== commentAndPost.commentId),
+      //       comments: post.comments - 1,
+      //     };
+      //     return updatedPost;
+      //   });
 
-        return previousPost;
-      },
-      onError: (err, data, context: any) => {
-        queryClient.setQueryData([`getPost`], context?.previousPost);
-      },
-      onSettled: (data: any, error: unknown, variables: any, context: any) => {
-        queryClient.invalidateQueries([`getPost`]);
-      },
+      //   return previousPost;
+      // },
+      // onError: (err, data, context: any) => {
+      //   queryClient.setQueryData([`getPost`], context?.previousPost);
+      // },
+      // onSettled: (data: any, error: unknown, variables: any, context: any) => {
+      //   queryClient.invalidateQueries([`getPost`]);
+      // },
     }
   );
 }

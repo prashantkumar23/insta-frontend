@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   ActionIcon,
   Avatar,
@@ -11,26 +12,21 @@ import {
   TextInput,
 } from '@mantine/core';
 import {
-  IconArrowUpRight,
-  IconBookmark,
   IconCheck,
-  IconDots,
   IconHeart,
-  IconMessage,
   IconMessage2,
-  IconSend,
 } from '@tabler/icons';
 import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { showNotification } from '@mantine/notifications';
+
+
 import { User } from '../../hooks/auth/useGetUserDetail';
-import useCreateComment, { ICreateComment } from '../../hooks/comment/useCreateComment';
 import { FeedPost } from '../../hooks/post/useGetFeedPost';
 import useLikePost from '../../hooks/post/useLikePost';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import useUnlikePost from '../../hooks/post/useUnlikePost';
-import useGetPost from '../../hooks/post/useGetPost';
-import { useRouter } from 'next/router';
-import { showNotification } from '@mantine/notifications';
+import useCreateCommentOnFeedPage from '../../hooks/comment/createComment/useCreateCommentOnFeedPage';
 dayjs.extend(relativeTime);
 
 export interface IPostCard {
@@ -93,19 +89,18 @@ export const ReadMoreOrLess = ({
 
 const PostCard: React.FC<IPostCard> = ({ post, me }) => {
   const { id, imageUrl, createdAt, caption, likes, comments, user } = post;
-  // console.log('Image Url', imageUrl);
   const router = useRouter();
-  const [value, onChange] = useState('');
   const [comment, setComment] = useState('');
 
   const { mutate: likePost, data: likeData } = useLikePost({ postId: id, userId: me.id });
   const { mutate: unlikePost, data: unlikeData } = useUnlikePost({ postId: id, userId: me.id });
+
   const {
-    mutate: commentPost,
-    data: commentData,
-    isSuccess: commentDataIsSuccess,
-    isLoading: commentIsLoading,
-  } = useCreateComment({
+    mutate: commentPostOnFeed,
+    data: commentDataOnFeed,
+    isSuccess: commentDataIsSuccessOnFeed,
+    isLoading: commentIsLoadingOnFeed,
+  } = useCreateCommentOnFeedPage({
     comment,
     postId: id,
     whoCommented: me.id,
@@ -113,8 +108,7 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
   });
 
   useEffect(() => {
-    if (commentDataIsSuccess && commentData.comment) {
-      setComment('');
+    if (commentDataIsSuccessOnFeed && commentDataOnFeed.comment) {
       showNotification({
         message: 'Comment posted',
         radius: 'sm',
@@ -122,7 +116,7 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
         icon: <IconCheck size={18} />,
       });
     }
-  }, [commentDataIsSuccess]);
+  }, [commentDataIsSuccessOnFeed]);
 
   return (
     <Card
@@ -131,7 +125,7 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
       sx={() => ({
         width: 500,
         '@media (max-width: 650px)': {
-          width: "100%",
+          width: '100%',
         },
       })}
     >
@@ -218,7 +212,7 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
         </Text>
 
         {/* Caption */}
-        <ReadMoreOrLess limit={170} text={post.caption} postId={post.id} />
+        <ReadMoreOrLess limit={170} text={caption} postId={post.id} />
 
         {/* Comment Section */}
         <Grid>
@@ -228,13 +222,14 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
 
           <Grid.Col span={'auto'}>
             <TextInput
-              radius="xl"
+              radius="lg"
               size="xs"
-              maxLength={100}
-              onKeyDown={(e) => (e.key === 'Enter' ? commentPost() : undefined)}
+              maxLength={200}
+              onKeyDown={(e) => (e.key === 'Enter' ? commentPostOnFeed(post) : undefined)}
               rightSection={
                 <Button
                   mr={20}
+                  ml={10}
                   compact
                   size="xs"
                   variant="subtle"
@@ -243,8 +238,11 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
                     backgroundColor: 'transparent',
                     '&:disabled': { backgroundColor: 'transparent' },
                   }}
-                  onClick={() => commentPost()}
-                  disabled={commentIsLoading || comment.trim().length === 0}
+                  onClick={() => {
+                    commentPostOnFeed(post);
+                    setComment('');
+                  }}
+                  disabled={commentIsLoadingOnFeed || comment.trim().length === 0}
                 >
                   Post
                 </Button>

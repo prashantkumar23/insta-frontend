@@ -17,16 +17,17 @@ import {
   Avatar,
   MantineColor,
   SelectItemProps,
+  Paper,
 } from '@mantine/core';
 import MenuComponent from '../Menu';
 import { NextLink } from '@mantine/next';
-import NotificationMenuComponent from '../NotificationMenu';
-import { IconBrandInstagram } from '@tabler/icons';
+import { IconBrandInstagram, IconSearch } from '@tabler/icons';
 
-import CreatePostButton from '../Buttons/CreatePostButton';
 import { AccountContext } from '../../context/Accounts';
 import { useDebouncedValue, useMediaQuery } from '@mantine/hooks';
 import { User } from '../../hooks/auth/useGetUserDetail';
+import useSearch from '../../hooks/useSearch';
+import { useRouter } from 'next/router';
 
 const HEADER_HEIGHT = 60;
 
@@ -144,46 +145,13 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-const charactersList = [
-  {
-    image: 'https://img.icons8.com/clouds/256/000000/futurama-bender.png',
-    label: 'Bender Bending Rodríguez',
-  },
-
-  {
-    image: 'https://img.icons8.com/clouds/256/000000/futurama-mom.png',
-    label: 'Carol Miller',
-  },
-  {
-    image: 'https://img.icons8.com/clouds/256/000000/homer-simpson.png',
-    label: 'Homer Simpson',
-  },
-  {
-    image: 'https://img.icons8.com/clouds/256/000000/spongebob-squarepants.png',
-    label: 'Spongebob Squarepants',
-  },
-];
-
-const data = charactersList.map((item) => ({ ...item, value: item.label }));
-
 interface ItemProps extends SelectItemProps {
-  color: MantineColor;
-  description: string;
-  image: string;
+  name: string;
+  username: string;
+  pic: string;
+  _id: string;
+  value: string;
 }
-
-const AutoCompleteItem = forwardRef<HTMLDivElement, ItemProps>(
-  ({ description, value, image, ...others }: ItemProps, ref) => (
-    <div ref={ref} {...others} style={{ borderRadius: '0.7rem' }}>
-      <Group noWrap>
-        <Avatar src={image} />
-        <div>
-          <Text>{value}</Text>
-        </div>
-      </Group>
-    </div>
-  )
-);
 
 interface HeaderTabsProps {
   user: User;
@@ -193,17 +161,70 @@ interface HeaderTabsProps {
 export function Header({ user }: HeaderTabsProps) {
   const { classes, theme, cx } = useStyles();
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchedData, setSearchedData] = useState([]);
+  const router = useRouter();
   const [debounced] = useDebouncedValue(searchTerm, 1000);
-  const matches = useMediaQuery('(max-width: 500px)', true, { getInitialValueInEffect: false });
+  // const matches = useMediaQuery('(max-width: 500px)', true, { getInitialValueInEffect: false });
+  const {
+    refetch,
+    data: searchResults,
+    isLoading,
+    isSuccess,
+    isError,
+    error,
+  } = useSearch({
+    searchTerm,
+  });
 
   useEffect(() => {
-    console.log("Debounced Value", debounced)
+    refetch();
   }, [debounced]);
 
+  useEffect(() => {
+    if (searchResults) {
+      const res = JSON.parse(searchResults.searchResult);
+
+      if (res.length > 0) {
+        const d = res.map((ele: any) => {
+          return {
+            value: ele.username,
+            ...ele,
+          };
+        });
+
+        console.log(d);
+        setSearchedData(d);
+      } else {
+        setSearchedData([]);
+      }
+    }
+
+    if (isError) {
+      console.log('Data error', error);
+    }
+  }, [isLoading]);
+
+  const AutoCompleteItem = forwardRef<HTMLDivElement, ItemProps>(
+    ({ username, name, pic, _id }: ItemProps, ref) => (
+      <Paper ref={ref} p={5} mb={10} onClick={() => router.push(`/${_id}`)} radius="md" withBorder sx={{cursor: "pointer"}}>
+        <Group noWrap>
+          <Avatar src={pic} radius="xl" size={30} />
+          <div>
+            <Text>{name}</Text>
+            <Text size={'xs'} c="dimmed">
+              {username}
+            </Text>
+          </div>
+        </Group>
+      </Paper>
+    )
+  );
+
   return (
-    <div className={classes.header}
-    //  style={{backgroundColor: matches ? "lightgreen": "lightcoral"}}
-     >
+    <div
+      className={classes.header}
+      //  style={{backgroundColor: matches ? "lightgreen": "lightcoral"}}
+    >
       <Container className={classes.mainSection}>
         <Group position="apart">
           {/* <MantineLogo /> */}
@@ -218,17 +239,17 @@ export function Header({ user }: HeaderTabsProps) {
               onChange={setSearchTerm}
               placeholder="Search..."
               itemComponent={AutoCompleteItem}
-              data={data}
-              filter={(value, item) =>
-                item.value.toLowerCase().includes(searchTerm.toLowerCase().trim())
-              }
+              data={searchedData}
+              icon={<IconSearch size={16} />}
+              nothingFound={<Text>No Results found</Text>}
+              // filter={(value, item) =>
+              //   item.value.toLowerCase().includes(searchTerm.toLowerCase().trim())
+              // }
               // style={{ width: '16rem' }}
-            /> 
-            {/* <CreatePostButton  radius="xl" /> */}
-            {/* {user ? <Fragment>
-         
-        
-            {/* </Fragment>: null} */}
+              transition="pop-top-left"
+              transitionDuration={80}
+              transitionTimingFunction="ease"
+            />
           </Group>
 
           <MenuComponent {...user} />

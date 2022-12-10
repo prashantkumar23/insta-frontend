@@ -1,61 +1,48 @@
-import { forwardRef, Fragment, useContext, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import {
   Group,
   Avatar,
-  Text,
   Menu,
-  UnstyledButton,
-  Divider,
   useMantineTheme,
-  Button,
 } from '@mantine/core';
 import CreatePostDialog from './HomePage/CreatePost';
-import {
-  Logout,
-  Polaroid,
-
-} from 'tabler-icons-react';
-import { AccountContext } from '../context/Accounts';
+import { Logout, Polaroid, UserCircle } from 'tabler-icons-react';
 import { User } from '../hooks/auth/useGetUserDetail';
-
-interface UserButtonProps extends React.ComponentPropsWithoutRef<'button'> {
-  image: string;
-  name: string;
-  email: string;
-  icon?: React.ReactNode;
-}
-
-const UserButton = forwardRef<HTMLButtonElement, UserButtonProps>(
-  ({ image, name, email, icon, ...others }: UserButtonProps, ref) => (
-    <UnstyledButton
-      ref={ref}
-      sx={(theme) => ({
-        display: 'block',
-        width: '100%',
-        padding: theme.spacing.md,
-        color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.black,
-
-        '&:hover': {
-          backgroundColor:
-            theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
-        },
-      })}
-      {...others}
-    >
-      <Group>
-        <Avatar src={image} radius="xl" size={35} />
-      </Group>
-    </UnstyledButton>
-  )
-);
+import useLogout from '../hooks/auth/useLogout';
+import { useRouter } from 'next/router';
+import { showNotification } from '@mantine/notifications';
+import { IconCheck, IconX } from '@tabler/icons';
+import { NextLink } from '@mantine/next';
 
 function MenuComponent(user: User) {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
+  const { mutate, isSuccess, isLoading, data, isError } = useLogout();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isSuccess) {
+      showNotification({
+        message: data.message,
+        radius: 'sm',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+      router.push('/login');
+    }
+
+    if (isError) {
+      showNotification({
+        message: 'Something went wrong!',
+        radius: 'sm',
+        color: 'red',
+        icon: <IconX size={18} />,
+      });
+    }
+  }, [isSuccess, isError]);
 
   return (
     <Fragment>
-      {/* {user ? ( */}
       <CreatePostDialog opened={opened} setOpened={setOpened} user={user} />
       <Group position="center">
         <Menu
@@ -74,17 +61,22 @@ function MenuComponent(user: User) {
             <Menu.Item
               icon={<Polaroid size={14} color={theme.colors.grape[6]} />}
               onClick={() => setOpened(true)}
+              disabled={isLoading}
             >
               Create post
             </Menu.Item>
-            {/* <NextLink passHref href="/login" style={{ textDecoration: 'none' }}>
-                  <Menu.Item icon={<Heart size={14} color={theme.colors.red[6]} />}>
-                    Liked posts
-                  </Menu.Item>
-                </NextLink>
+            <NextLink passHref href="/me" style={{ textDecoration: 'none' }}>
+              <Menu.Item icon={<UserCircle size={14} color={theme.colors.blue[6]} />}>
+                My Profile
+              </Menu.Item>
+            </NextLink>
 
-             */}
-            <Menu.Item icon={<Logout size={14} />} color={theme.colors.red[6]}>
+            <Menu.Item
+              disabled={isLoading}
+              icon={<Logout size={14} />}
+              color={theme.colors.red[6]}
+              onClick={() => mutate()}
+            >
               Logout
             </Menu.Item>
           </Menu.Dropdown>

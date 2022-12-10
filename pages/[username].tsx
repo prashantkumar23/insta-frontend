@@ -24,6 +24,7 @@ import { useRouter } from 'next/router';
 import getUserDetail, { IGetUserDetail } from '../hooks/auth/useGetUserDetail';
 import { getToken } from '../utility/gettoken';
 import useGetFeedPost, { FeedPost } from '../hooks/post/useGetFeedPost';
+import SkeletonFeedCard from '../components/Skeleton/SkeletonFeedCard';
 
 const LIMIT = 100;
 
@@ -34,7 +35,7 @@ const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
       radius={'xs'}
       style={{ backgroundColor: 'transparent' }}
       // p="sm"
-      // onClick={() => setOpened(true)}
+      onClick={() => router.push(`/p/${id}`)}
       m={5}
       p={0}
     >
@@ -46,7 +47,7 @@ const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
         onClick={() => console.log('Card')}
         style={{ cursor: 'pointer' }}
       />
-      <Group mt={10} pl={5} spacing={10} style={{ cursor: 'pointer' }}>
+      {/* <Group mt={10} pl={5} spacing={10} style={{ cursor: 'pointer' }}>
         <Group spacing={4} onClick={() => router.push(`/p/${id}`)}>
           <IconHeart size={18} stroke={1} />
           <Text color="dimmed" size="xs">
@@ -59,7 +60,7 @@ const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
             {comments}
           </Text>
         </Group>
-      </Group>
+      </Group> */}
     </Card>
   );
 };
@@ -67,7 +68,11 @@ const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
 const Username: NextPage = ({ user }: any) => {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
-  const { refetch, data, isSuccess } = useGetFeedPost({ userId: user.id, limit: LIMIT, skip: 0 });
+  const { refetch, data, isSuccess, isLoading } = useGetFeedPost({
+    userId: user.id,
+    limit: LIMIT,
+    skip: 0,
+  });
   // console.log('USer', user);
 
   useEffect(() => {
@@ -141,36 +146,33 @@ const Username: NextPage = ({ user }: any) => {
                   </Button>
                 </div>
               </Grid.Col>
-
-              {/* <Divider mt={40} /> */}
-
-              {/* <Stack>
-                  <Button leftIcon={<IconLogout color="grey" />} variant="subtle" mt={20}>
-                    <Text color={'dimmed'} align="left">
-                      Logout
-                    </Text>
-                  </Button>
-                </Stack> */}
             </Grid>
           </Center>
 
-          {/* ) : null} */}
-
-          {/* <Grid.Col span={!matches ? 12 : 9} pl={50}> */}
           {/* <Title mb={20} ml={20}>
             Feed
           </Title> */}
           <Divider />
-          <Grid justify={'flex-start'} gutter={0}>
-            {data?.posts &&
-              data.posts.map((item, index) => {
-                return (
-                  <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={item.id}>
-                    <FeedCard {...item} />
-                  </Grid.Col>
-                );
-              })}
-          </Grid>
+          {isLoading ? (
+            <Grid justify={'flex-start'} gutter={0}>
+              {Array(10).fill(undefined).map((_, index) => (
+                <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={index}>
+                  <SkeletonFeedCard />
+                </Grid.Col>
+              ))}
+            </Grid>
+          ) : (
+            <Grid justify={'flex-start'} gutter={0}>
+              {data?.posts &&
+                data.posts.map((item, index) => {
+                  return (
+                    <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={item.id}>
+                      <FeedCard {...item} />
+                    </Grid.Col>
+                  );
+                })}
+            </Grid>
+          )}
         </Stack>
         {/* </Grid> */}
       </AppLayout>

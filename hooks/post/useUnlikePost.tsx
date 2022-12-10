@@ -38,9 +38,12 @@ function useUnlikePost({ postId, userId }: IUnlikePost) {
         const previousPost = queryClient.getQueryData(['getFeedPost']);
 
         queryClient.setQueryData(['getFeedPost'], (prev: any) => {
-          let feedPost: FeedPost[] = [...prev];
+          let feedPost: FeedPost[] = [...prev.posts];
+
           const indexOfLikePost = feedPost.findIndex((p: FeedPost) => p.id === post.id);
+
           let likedPost = feedPost.find((p) => p.id === post.id);
+
           let updatedlikedPost = {
             ...likedPost,
             wasLikeByMe: false,
@@ -48,13 +51,21 @@ function useUnlikePost({ postId, userId }: IUnlikePost) {
           };
           // @ts-ignore
           feedPost[indexOfLikePost] = updatedlikedPost!;
-          return feedPost;
+
+          const feedPostNew: any = {
+            count: prev.count,
+            isSuccess: prev.isSuccess,
+            message: prev.message,
+            posts: feedPost,
+          };
+
+          return feedPostNew;
         });
 
         return { previousPost };
       },
-      onError: (err, newTodo, context) => {
-        queryClient.setQueryData(['getFeedPost'], context?.previousPost);
+      onError: (err, newTodo, context: any) => {
+        queryClient.setQueryData(['getFeedPost'], context);
       },
       onSettled: () => {
         queryClient.invalidateQueries(['getFeedPost']);

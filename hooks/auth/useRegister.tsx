@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
-import request, { gql } from 'graphql-request';
+import { useMutation } from '@tanstack/react-query';
+import { gql } from 'graphql-request';
 import { graphQLClientForFrontend } from '../../graphql';
 
 interface IRegisterProps {
@@ -9,7 +9,12 @@ interface IRegisterProps {
   password: string;
 }
 
-function useRegisterNew({ username, password, name, email }: IRegisterProps) {
+interface IRegisterServerResponse {
+  message: string;
+  isSuccess: boolean;
+}
+
+function useRegister({ username, password, name, email }: IRegisterProps) {
   const variables = {
     username,
     password,
@@ -20,29 +25,22 @@ function useRegisterNew({ username, password, name, email }: IRegisterProps) {
   const mutation = gql`
     mutation SignUp($username: String!, $password: String!, $name: String!, $email: String!) {
       signup(input: { username: $username, password: $password, name: $name, email: $email }) {
-        UserSub
-        UserConfirmed
-        CodeDeliveryDetails {
-          Destination
-          DeliveryMedium
-          AttributeName
-        }
+        message
+        isSuccess
       }
     }
   `;
 
-  return useQuery(
+  return useMutation(
     ['signup'],
     async () => {
       const data = await graphQLClientForFrontend.request(mutation, variables);
-      return data;
+      return data.signup as IRegisterServerResponse;
     },
     {
-      enabled: false,
-      refetchOnWindowFocus: false,
       retry: false,
     }
   );
 }
 
-export default useRegisterNew;
+export default useRegister;

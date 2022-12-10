@@ -3,7 +3,7 @@ import { AppShell, useMantineTheme, Center } from '@mantine/core';
 
 import { SpotlightAction, SpotlightProvider } from '@mantine/spotlight';
 import { Dashboard, FileText, Home, Search } from 'tabler-icons-react';
-import { Header } from '../components/Header/HeaderNew';
+import { Header } from '../components/Header';
 import { IconSearch } from '@tabler/icons';
 import { User } from '../hooks/auth/useGetUserDetail';
 import { useMediaQuery } from '@mantine/hooks';

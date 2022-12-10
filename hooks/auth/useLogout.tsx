@@ -1,30 +1,29 @@
 import { useMutation } from '@tanstack/react-query';
-import request, { gql } from 'graphql-request';
+import { gql } from 'graphql-request';
 import { graphQLClientForFrontend } from '../../graphql';
 
-interface ILogoutProps {
-  accessToken: string;
+
+export interface ILogoutReponse {
+  isSuccess: boolean;
+  message: string;
 }
 
-function useLogout({ accessToken }: ILogoutProps) {
-  const variables = {
-    accessToken,
-  };
-
+function useLogout() {
   const mutation = gql`
-    mutation Logout($accessToken: String!) {
-      logout(input: { accessToken: $accessToken }) {
-        message
-        isSuccess
-      }
+  mutation Logout{
+    logout {
+      message
+      isSuccess
     }
-  `;
+  }
+`;
+
 
   return useMutation(
     ['logout'],
     async () => {
-      const data = await graphQLClientForFrontend.request(mutation, variables);
-      return data;
+      const data = await graphQLClientForFrontend.request(mutation);
+      return data.logout as ILogoutReponse;
     },
     {
       retry: false,

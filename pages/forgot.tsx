@@ -22,7 +22,9 @@ import { CognitoUser } from 'amazon-cognito-identity-js';
 import { showNotification } from '@mantine/notifications';
 // import useResetPassword from '../hooks/auth/useResetPassword';
 import { NextLink } from '@mantine/next';
-import { IconCheck } from '@tabler/icons';
+import { IconCheck, IconInfoCircle, IconX } from '@tabler/icons';
+import useSendCode from '../hooks/auth/useSendCode';
+import useResetPassword from '../hooks/auth/useResetPassword';
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -59,55 +61,92 @@ function ForgotPassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordError, setPasswordError] = useState({ value: false, message: '' });
+  const [username, setUsername] = useState('');
   const theme = useMantineTheme();
+  const { isSuccess, isError,mutate, isLoading, data } = useSendCode({
+    email: email.value,
+  });
+  const {
+    isSuccess: isSuccessRP,
+    isError: isErrorRP,
+    data: dataRP,
+    isLoading: isLoadingRP,
+    mutate: mutateRP,
+    error: errorRP
+  } = useResetPassword({ username, code: code.trim(), newPassword: password });
 
-  const queryClient = new QueryClient();
-  // const { refetch, isSuccess, isError, error, isFetching } = useSendCode({ email: email.value });
-  // const {
-  //   refetch: refetchRP,
-  //   isSuccess: isSuccessRP,
-  //   isError: isErrorRP,
-  //   error: errorRP,
-  //   isFetching: isFetchingRP,
-  //   data: dataRP,
-  // } = useResetPassword({ email: email.value, code, password });
+  useEffect(() => {
+    if (stage === 2) {
+      setUsername(JSON.parse(localStorage.getItem('username_temp') as string));
+    } 
 
-  // useEffect(() => {
-  //   if (isError) {
-  //     showNotification({
-  //       //@ts-ignore
-  //       message: error.message,
-  //       radius: 'xl',
-  //       color: 'red',
-  //       icon: <IconX size={18} />,
-  //     });
-  //   }
-  // }, [isError]);
+    if(stage === 3) {
+      localStorage.removeItem("username_temp")
+    }
+  }, [stage]);
 
-  // useEffect(() => {
-  //   if (isErrorRP) {
-  //     showNotification({
-  //       //@ts-ignore
-  //       message: errorRP.message,
-  //       radius: 'xl',
-  //       color: 'red',
-  //       icon: <IconX size={18} />,
-  //     });
-  //   }
-  // }, [isErrorRP]);
+  useEffect(() => {
+    if (isSuccess) {
+      const { isSuccess, message, username } = data;
+      if (isSuccess) {
+        localStorage.setItem('username_temp', JSON.stringify(username));
+        setStage(2);
+        showNotification({
+          message: message,
+          radius: 'xl',
+          color: 'green',
+          icon: <IconCheck size={18} />,
+        });
+      } else {
+        showNotification({
+          message: message,
+          radius: 'xl',
+          color: 'yellow',
+          icon: <IconInfoCircle size={18} />,
+        });
+      }
+    }
+    if (isError) {
+      showNotification({
+        message: JSON.stringify(errorRP),
+        radius: 'xl',
+        color: 'red',
+        icon: <IconX size={18} />,
+      });
+    }
+  }, [isSuccess, isError]);
 
-  // useEffect(() => {
-  //   if (isSuccess) {
-  //     setStage(2);
-  //   }
-  // }, [isSuccess]);
+  useEffect(() => {
+    if (isSuccessRP) {
+      const { isSuccess, message } = dataRP;
+      if (isSuccess) {
+        setStage(3);
+        localStorage.removeItem('username_temp');
+        showNotification({
+          message: message,
+          radius: 'xl',
+          color: 'green',
+          icon: <IconCheck size={18} />,
+        });
+      } else {
+        showNotification({
+          message: message,
+          radius: 'xl',
+          color: 'red',
+          icon: <IconX size={18} />,
+        });
+      }
+    }
 
-  // useEffect(() => {
-  //   if (isSuccessRP) {
-  //     setStage(3);
-  //     queryClient.invalidateQueries();
-  //   }
-  // }, [isSuccessRP]);
+    if (isErrorRP) {
+      showNotification({
+        message: 'Something went wrong!',
+        radius: 'xl',
+        color: 'red',
+        icon: <IconX size={18} />,
+      });
+    }
+  }, [isSuccessRP, isErrorRP]);
 
   const sendCode = () => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
@@ -116,7 +155,7 @@ function ForgotPassword() {
       });
       return;
     }
-    // refetch();
+    mutate();
   };
 
   const resetPassword = () => {
@@ -131,7 +170,7 @@ function ForgotPassword() {
       });
       return;
     }
-    // refetchRP();
+    mutateRP()
   };
 
   return (
@@ -167,6 +206,7 @@ function ForgotPassword() {
                   })
                 }
                 error={email.error && 'Email is invalid'}
+                disabled={isLoading}
               />
               <Group position="apart" mt="lg" className={classes.controls}>
                 <Anchor color="dimmed" size="sm" className={classes.control} href="/login">
@@ -181,7 +221,8 @@ function ForgotPassword() {
                   className={classes.control}
                   radius="xl"
                   onClick={() => sendCode()}
-                  // loading={isFetching}
+                  loading={isLoading}
+                  disabled={isLoading}
                 >
                   Send the code
                 </Button>
@@ -214,6 +255,7 @@ function ForgotPassword() {
                 radius={'xl'}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
+                disabled={isLoadingRP}
               />
               <TextInput
                 label="New Password"
@@ -225,6 +267,7 @@ function ForgotPassword() {
                   setPassword(e.target.value);
                   setPasswordError({ value: false, message: '' });
                 }}
+                disabled={isLoadingRP}
               />
               <TextInput
                 label="Confirm New Password"
@@ -236,6 +279,7 @@ function ForgotPassword() {
                   setConfirmPassword(e.target.value);
                   setPasswordError({ value: false, message: '' });
                 }}
+                disabled={isLoadingRP}
               />
               <Text size={'xs'} color="red" mt={5}>
                 {passwordError.value ? passwordError.message : null}
@@ -245,7 +289,8 @@ function ForgotPassword() {
                   className={classes.control}
                   radius="xl"
                   onClick={() => resetPassword()}
-                  // loading={isFetchingRP}
+                  loading={isLoadingRP}
+                  disabled={isLoadingRP}
                 >
                   Update password
                 </Button>
@@ -267,7 +312,15 @@ function ForgotPassword() {
         >
           <Paper style={{ width: '100%' }} p={30} radius="xl">
             <Title className={classes.title} align="center">
-              Great! your password now is changed <IconCheck style={{ backgroundColor: theme.colors.green[6],color: "white", borderRadius: "50%", padding: 2}}/>
+              Great! your password now is changed{' '}
+              <IconCheck
+                style={{
+                  backgroundColor: theme.colors.green[6],
+                  color: 'white',
+                  borderRadius: '50%',
+                  padding: 2,
+                }}
+              />
             </Title>
             <Text align="center" mt={15} size="xs">
               Now you can login again
