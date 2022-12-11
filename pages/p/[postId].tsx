@@ -112,8 +112,7 @@ const PostPage: NextPage = (props: any) => {
   const { postId } = router.query;
   const queryClient = useQueryClient();
   //@ts-ignore
-  const PostData: SpecificPost | undefined = queryClient.getQueryData(['getPost', props.postId])
-    .post as SpecificPost;
+  const PostData: SpecificPost | undefined = queryClient.getQueryData(['getPost', props.postId]).post as SpecificPost;
   const [comment, setComment] = useState('');
   const [commentIdToBeDeleted, setCommentIdToBeDeleted] = useState('');
 
