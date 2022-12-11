@@ -18,14 +18,14 @@ import ProfileCard from '../components/Cards/ProfileCard';
 import SkeletonProfilePostCard from '../components/Skeleton/SkeletonProfileCard';
 import SkeletonUserRecommendationCard from '../components/Skeleton/SkeletonUserRecommendation';
 
-const LIMIT = 50;
+const LIMIT = 10;
 
 const HomePage: NextPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   const {
     refetch,
     data,
     isLoading: isLoadingFeedPost,
-  } = useGetFeedPost({ userId: props.user.id!, limit: LIMIT, skip: 0 });
+  } = useGetFeedPost({ userId: "", limit: LIMIT, skip: 0 });
 
 
   const {

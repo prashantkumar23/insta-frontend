@@ -2,6 +2,7 @@ import { Avatar, Button, Card, Group, Text, Stack } from '@mantine/core';
 import { showNotification } from '@mantine/notifications';
 import { IconCheck } from '@tabler/icons';
 import { useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import useFollow from '../../hooks/user/useFollow';
 import useUnfollow from '../../hooks/user/useUnfollow';
@@ -32,6 +33,7 @@ const UserRecommendationCard: React.FC<UserRecommendationCardProps> = ({
     whoToUnfollow: userId,
   });
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   useEffect(() => {
     if (followIsSuccess) {
@@ -60,7 +62,20 @@ const UserRecommendationCard: React.FC<UserRecommendationCardProps> = ({
   return (
     <Card radius={'md'} style={{ width: '100%', backgroundColor: 'transparent' }} p={3}>
       <Group position="apart">
-        <Group position="left" spacing={10}>
+        <Group
+          position="left"
+          spacing={10}
+          onClick={() =>
+            router.push(
+              // {
+              //   pathname: `/${username}`,
+              //   query: { username },
+              // },
+              `/${username}`
+            )
+          }
+          sx={{ cursor: 'pointer' }}
+        >
           <Avatar src={pic} radius="xl" />
           <Stack spacing={1}>
             <Text weight={400} style={{ fontSize: '0.8rem' }}>

@@ -96,7 +96,7 @@ const variables = {
 };
 
   const data: IGetPostInDetailServerResponse = await graphQLClient.request(query, variables).then(data => data.getSpecificPost);
-  console.log('Data from POst ********', data);
+  // console.log('Data from POst ********', data);
 
   return data
 

@@ -4,7 +4,7 @@ import { gql } from 'graphql-request';
 import { graphQLClientForFrontend } from '../../graphql';
 
 export interface IGetFeedPost {
-  userId: string;
+  username: string;
   limit: number;
   skip: number;
 }
@@ -32,16 +32,16 @@ export interface FeedPostResponse {
   count: number
 }
 
-function useGetFeedPost({ userId, limit, skip }: IGetFeedPost) {
+function useGetUserPost({ username, limit, skip }: IGetFeedPost) {
   const variables = {
-    userId,
+    username,
     limit,
     skip
   };
 
   const query = gql`
-    query getFeedPost($userId: String!, $limit: Float!, $skip: Float!) {
-      getFeedPost(input: { userId: $userId, limit: $limit, skip: $skip }) {
+    query getUserPost($username: String!, $limit: Float!, $skip: Float!) {
+      getUserPost(input: { username: $username, limit: $limit, skip: $skip }) {
         message
         isSuccess
         posts {
@@ -65,18 +65,16 @@ function useGetFeedPost({ userId, limit, skip }: IGetFeedPost) {
   `;
 
   return useQuery<FeedPostResponse>(
-    ['getFeedPost'],
+    ['getUserPost'],
     async () => {
       const data = await graphQLClientForFrontend.request(query, variables);
-      return data.getFeedPost;
+      return data.getUserPost;
     },
     {
       enabled: false,
       retry: false,
-      staleTime: 0,
-      cacheTime: 0
     }
   );
 }
 
-export default useGetFeedPost;
+export default useGetUserPost;

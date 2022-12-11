@@ -18,13 +18,13 @@ import {
 import AppLayout from '../layout/AppLayout';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { GetServerSidePropsContext, NextPage } from 'next';
-import { IconHeart, IconLogout, IconMessage2 } from '@tabler/icons';
 import { useRouter } from 'next/router';
 
 import getUserDetail, { IGetUserDetail } from '../hooks/auth/useGetUserDetail';
 import { getToken } from '../utility/gettoken';
 import useGetFeedPost, { FeedPost } from '../hooks/post/useGetFeedPost';
 import SkeletonFeedCard from '../components/Skeleton/SkeletonFeedCard';
+import getOtherUserDetail, { IGetOtherUserDetail } from '../hooks/auth/useGetOtherUserDetail';
 
 const LIMIT = 100;
 
@@ -69,11 +69,10 @@ const Username: NextPage = ({ user }: any) => {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
   const { refetch, data, isSuccess, isLoading } = useGetFeedPost({
-    userId: user.id,
+    userId: '638d46f65de1260ae1991bc9',
     limit: LIMIT,
     skip: 0,
   });
-  // console.log('USer', user);
 
   useEffect(() => {
     refetch();
@@ -155,23 +154,43 @@ const Username: NextPage = ({ user }: any) => {
           <Divider />
           {isLoading ? (
             <Grid justify={'flex-start'} gutter={0}>
-              {Array(10).fill(undefined).map((_, index) => (
-                <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={index}>
-                  <SkeletonFeedCard />
-                </Grid.Col>
-              ))}
+              {Array(10)
+                .fill(undefined)
+                .map((_, index) => (
+                  <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={index}>
+                    <SkeletonFeedCard />
+                  </Grid.Col>
+                ))}
             </Grid>
           ) : (
-            <Grid justify={'flex-start'} gutter={0}>
-              {data?.posts &&
-                data.posts.map((item, index) => {
-                  return (
-                    <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={item.id}>
-                      <FeedCard {...item} />
-                    </Grid.Col>
-                  );
-                })}
-            </Grid>
+            <Fragment>
+              {data?.posts?.length === 0 && (
+                <div
+                  style={{
+                    width: '100%',
+                    height: '45vh',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Text c="dimmed" sx={{fontSize: "3rem"}} fs="italic">
+                    No post yet
+                  </Text>
+                </div>
+              )}
+
+              <Grid justify={'flex-start'} gutter={0}>
+                {data?.posts &&
+                  data.posts.map((item, index) => {
+                    return (
+                      <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={item.id}>
+                        <FeedCard {...item} />
+                      </Grid.Col>
+                    );
+                  })}
+              </Grid>
+            </Fragment>
           )}
         </Stack>
         {/* </Grid> */}
@@ -196,6 +215,8 @@ const Username: NextPage = ({ user }: any) => {
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
+   //@ts-ignore
+  const username = context.params.username; 
 
   const session = await queryClient.fetchQuery<IGetUserDetail>(['getUserDetail'], async () =>
     getUserDetail(getToken(context))
@@ -210,12 +231,29 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
+  console.log('Context', context.params);
+
   const fetchedUser = queryClient.getQueryData<IGetUserDetail>(['getUserDetail']);
+
+  const fetchOtherUserDetail = await queryClient.fetchQuery<IGetOtherUserDetail>(
+    ['getOtherUserDetail'],
+    async () =>
+      getOtherUserDetail(getToken(context), {
+        username: username as string,
+        userId: fetchedUser?.user?.id as string,
+      }),
+    {
+      retry: false,
+    }
+  );
+
+  console.log('F********', fetchOtherUserDetail);
 
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
-      user: fetchedUser!.user,
+      user: fetchOtherUserDetail!.user,
+      otheruserId: fetchOtherUserDetail.user?._id,
     },
   };
 }
