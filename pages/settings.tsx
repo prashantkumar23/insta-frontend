@@ -1,4 +1,20 @@
-import { Center, Divider, Grid, Paper, ScrollArea, Stepper, Tabs, Title, Text } from '@mantine/core';
+import {
+  Center,
+  Divider,
+  Grid,
+  Paper,
+  ScrollArea,
+  Stepper,
+  Tabs,
+  Title,
+  Text,
+  Stack,
+  Avatar,
+  Button,
+  Group,
+  TextInput,
+} from '@mantine/core';
+import { IconEditCircle } from '@tabler/icons';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
 import { useState } from 'react';
@@ -13,13 +29,64 @@ const SettingsPage = (props: InferGetServerSidePropsType<typeof getServerSidePro
 
   return (
     <AppLayout user={props.user!}>
-      <Paper
-        withBorder
-        radius={'xl'}
-        p={30}
-        // style={{ maxHeight: "calc(100vh)",  width: '100%' }}
-      >
-        <Grid>
+      <Center>
+        <Paper withBorder radius={'md'} p={30} style={{ width: '70%' }}>
+          <Center sx={{width: "100%", backgroundColor: "lightgreen"}}>
+            <Stack sx={{width: "100%"}}>
+              <Stack>
+                <Avatar size={100} radius="xl" sx={{ borderRadius: '50%' }} />
+
+                <Button
+                  radius={'lg'}
+                  // onClick={() => router.push('/settings')}
+                  variant="subtle"
+                  size="xs"
+                  mt={5}
+                >
+                  Upload
+                </Button>
+              </Stack>
+
+              <Stack sx={{width: "100%", backgroundColor: "lightcyan"}}>
+                <Grid gutter={5}>
+                  <Grid.Col span={4}>
+                    <Text>Name</Text>
+                  </Grid.Col>
+                  <Grid.Col span={'content'}>
+                    <TextInput disabled value={'Prashant'} />
+                  </Grid.Col>
+                </Grid>
+
+                <Grid gutter={5}>
+                  <Grid.Col span={4}>
+                    <Text>Username</Text>
+                  </Grid.Col>
+                  <Grid.Col span={'content'}>
+                    <TextInput disabled value={'rashant'} />
+                  </Grid.Col>
+                </Grid>
+
+                <Grid gutter={4}>
+                  <Grid.Col span={3}>
+                    <Text>Email</Text>
+                  </Grid.Col>
+                  <Grid.Col span={'content'}>
+                    <TextInput disabled value={'Prashant'} />
+                  </Grid.Col>
+                </Grid>
+              </Stack>
+            </Stack>
+          </Center>
+        </Paper>
+      </Center>
+    </AppLayout>
+  );
+};
+
+/*
+
+
+       <Grid>
           <Grid.Col span={3}>
             <Text mb={20} weight={700} size="xl">Settings</Text>
             <ScrollArea.Autosize type='hover' offsetScrollbars maxHeight={450} >
@@ -45,10 +112,8 @@ const SettingsPage = (props: InferGetServerSidePropsType<typeof getServerSidePro
             </Paper>
           </Grid.Col>
         </Grid>
-      </Paper>
-    </AppLayout>
-  );
-};
+
+*/
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
