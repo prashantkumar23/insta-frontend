@@ -177,7 +177,10 @@ export function Header({ user }: HeaderTabsProps) {
   });
 
   useEffect(() => {
-    refetch();
+    if(debounced) {
+      refetch();
+    }
+
   }, [debounced]);
 
   useEffect(() => {
