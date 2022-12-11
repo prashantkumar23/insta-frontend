@@ -6,20 +6,15 @@ import {
   Paper,
   Group,
   Button,
-  Divider,
   Anchor,
   Stack,
   Container,
   Center,
-  ActionIcon,
   createStyles,
   useMantineTheme,
   Title,
 } from '@mantine/core';
 import {
-  IconBrandGoogle,
-  IconBrandFacebook,
-  IconBrandTwitter,
   IconX,
   IconCheck,
 } from '@tabler/icons';
@@ -29,7 +24,7 @@ import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import { useContext, useEffect } from 'react';
 import { showNotification } from '@mantine/notifications';
-import useLoginNew from '../hooks/auth/useLogin';
+import useLogin from '../hooks/auth/useLogin';
 import { AccountContext } from '../context/Accounts';
 
 const useStyles = createStyles((theme) => ({
@@ -44,10 +39,8 @@ function LoginPage(props: any) {
   const theme = useMantineTheme();
   const context = useContext(AccountContext);
   if (!context) return null;
-  const { user, setUser } = context;
 
   const router = useRouter();
-  const queryClient = new QueryClient();
   const form = useForm({
     initialValues: {
       password: '',
@@ -60,7 +53,7 @@ function LoginPage(props: any) {
     },
   });
 
-  const { mutate, data, isSuccess, isError, isLoading, error } = useLoginNew({
+  const { mutate, data, isSuccess, isError, isLoading, error } = useLogin({
     username: form.values.username,
     password: form.values.password,
   });
