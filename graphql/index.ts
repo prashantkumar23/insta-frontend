@@ -16,6 +16,8 @@ export const graphQLClientForServer = (token: IToken) => {
     headers: {
       accesstoken: token.accesstoken!,
       idtoken: token.idtoken!
-    }
+    },
+    credentials: "include",
+    mode: "cors"
   })
 }
