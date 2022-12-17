@@ -6,7 +6,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import CreatePostDialog from './HomePage/CreatePost';
-import { Logout, Polaroid, UserCircle } from 'tabler-icons-react';
+import { Logout, Polaroid, Settings, UserCircle } from 'tabler-icons-react';
 import { User } from '../hooks/auth/useGetUserDetail';
 import useLogout from '../hooks/auth/useLogout';
 import { useRouter } from 'next/router';
@@ -68,6 +68,12 @@ function MenuComponent(user: User) {
             <NextLink passHref href="/me" style={{ textDecoration: 'none' }}>
               <Menu.Item icon={<UserCircle size={14} color={theme.colors.blue[6]} />}>
                 My Profile
+              </Menu.Item>
+            </NextLink>
+
+            <NextLink passHref href="/settings" style={{ textDecoration: 'none' }}>
+              <Menu.Item icon={<Settings size={14} color={theme.colors.blue[6]} />}>
+                Settings
               </Menu.Item>
             </NextLink>
 

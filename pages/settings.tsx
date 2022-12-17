@@ -1,119 +1,133 @@
 import {
   Center,
-  Divider,
   Grid,
   Paper,
-  ScrollArea,
-  Stepper,
-  Tabs,
-  Title,
   Text,
   Stack,
   Avatar,
   Button,
-  Group,
   TextInput,
+  Container,
+  Group,
 } from '@mantine/core';
-import { IconEditCircle } from '@tabler/icons';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from 'next';
-import { useState } from 'react';
-import { SettingInfoCard } from '../components/Settings/SettingInfoCard';
+import { GetServerSidePropsContext } from 'next';
+import { useEffect, useState } from 'react';
+import UploadProfileImage from '../components/UploadProfileImage';
 import getUserDetail, { IGetUserDetail } from '../hooks/auth/useGetUserDetail';
 import AppLayout from '../layout/AppLayout';
-import AccountSetting from '../layout/Settings/AccountSetting';
 import { getToken } from '../utility/gettoken';
 
-const SettingsPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  const [active, setActive] = useState(1);
+const SettingsPage = (props: any) => {
+  const [opened, setOpened] = useState(false);
+
+  const [user, setUser] = useState({
+    username: '',
+    email: '',
+    name: '',
+    pic: '',
+  });
+
+  useEffect(() => {
+    if (props.user) {
+      const {
+        user: { name, email, username, pic },
+      } = props;
+      setUser({
+        name,
+        username,
+        email,
+        pic,
+      });
+    }
+  }, [props]);
 
   return (
     <AppLayout user={props.user!}>
-      <Center>
-        <Paper withBorder radius={'md'} p={30} style={{ width: '70%' }}>
-          <Center sx={{width: "100%", backgroundColor: "lightgreen"}}>
-            <Stack sx={{width: "100%"}}>
-              <Stack>
-                <Avatar size={100} radius="xl" sx={{ borderRadius: '50%' }} />
+      <Container>
+        <Paper withBorder radius={'xl'} p={30} style={{ height: '80vh' }}>
+          <Center sx={{ width: '100%' }}>
+            <Stack sx={{ width: '100%' }}>
+              <Center sx={{ width: '100%' }}>
+                <Stack>
+                  <Avatar size={100} radius="xl" sx={{ borderRadius: '50%' }} src={user.pic} />
 
-                <Button
-                  radius={'lg'}
-                  // onClick={() => router.push('/settings')}
-                  variant="subtle"
-                  size="xs"
-                  mt={5}
-                >
-                  Upload
-                </Button>
-              </Stack>
+                  <Button
+                    radius={'lg'}
+                    onClick={() => setOpened(true)}
+                    variant="subtle"
+                    size="xs"
+                    mt={5}
+                  >
+                    Change
+                  </Button>
+                </Stack>
+              </Center>
 
-              <Stack sx={{width: "100%", backgroundColor: "lightcyan"}}>
-                <Grid gutter={5}>
-                  <Grid.Col span={4}>
-                    <Text>Name</Text>
-                  </Grid.Col>
-                  <Grid.Col span={'content'}>
-                    <TextInput disabled value={'Prashant'} />
-                  </Grid.Col>
-                </Grid>
+              <Grid justify={'center'} align="center" mt={20} gutter={30}>
+                <Grid.Col span={'content'}>
+                  <Stack>
+                    <Stack spacing={5}>
+                      <Text size="xs">Name</Text>
+                      <TextInput
+                        disabled
+                        value={user.name}
+                        onChange={(e) =>
+                          setUser((prevState) => {
+                            return {
+                              ...prevState,
+                              name: e.target.value,
+                            };
+                          })
+                        }
+                        radius="lg"
+                      />
+                    </Stack>
 
-                <Grid gutter={5}>
-                  <Grid.Col span={4}>
-                    <Text>Username</Text>
-                  </Grid.Col>
-                  <Grid.Col span={'content'}>
-                    <TextInput disabled value={'rashant'} />
-                  </Grid.Col>
-                </Grid>
+                    <Stack spacing={5}>
+                      <Text size={"xs"}>Username</Text>
+                      <TextInput
+                        disabled
+                        value={user.username}
+                        onChange={(e) =>
+                          setUser((prevState) => {
+                            return {
+                              ...prevState,
+                              username: e.target.value,
+                            };
+                          })
+                        }
+                        radius="lg"
+                      />
+                    </Stack>
 
-                <Grid gutter={4}>
-                  <Grid.Col span={3}>
-                    <Text>Email</Text>
-                  </Grid.Col>
-                  <Grid.Col span={'content'}>
-                    <TextInput disabled value={'Prashant'} />
-                  </Grid.Col>
-                </Grid>
-              </Stack>
+                    <Stack spacing={5}>
+                      <Text size={"xs"}>Email</Text>
+                      <TextInput
+                        disabled
+                        value={user.email}
+                        onChange={(e) =>
+                          setUser((prevState) => {
+                            return {
+                              ...prevState,
+                              email: e.target.value,
+                            };
+                          })
+                        }
+                        radius="lg"
+                      />
+                    </Stack>
+                  </Stack>
+                </Grid.Col>
+              </Grid>
             </Stack>
           </Center>
         </Paper>
-      </Center>
+      </Container>
+      <UploadProfileImage opened={opened} setOpened={setOpened} user={props.user} />
     </AppLayout>
   );
 };
-
-/*
-
-
-       <Grid>
-          <Grid.Col span={3}>
-            <Text mb={20} weight={700} size="xl">Settings</Text>
-            <ScrollArea.Autosize type='hover' offsetScrollbars maxHeight={450} >
-              <Grid gutter={'xl'}>
-                {data.map((ele, index) => {
-                  return (
-                    <Grid.Col onClick={() => setActive(index + 1)} style={{ cursor: 'pointer' }}>
-                      <SettingInfoCard
-                        body={ele.body}
-                        author={ele.author}
-                      />
-                      <Divider mt={5}/>
-                    </Grid.Col>
-                  );
-                })}
-              </Grid>
-            </ScrollArea.Autosize>
-          </Grid.Col>
-          <Grid.Col span={9}>
-            <Paper>
-              {active === 1 ? <AccountSetting/> :    <Title>Coming Soon...</Title>}
-           
-            </Paper>
-          </Grid.Col>
-        </Grid>
-
-*/
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
@@ -142,62 +156,3 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
 }
 
 export default SettingsPage;
-
-const data = [
-  {
-    body: 'This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.',
-    author: {
-      name: 'Account',
-      image:
-        'https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80',
-    },
-  },
-  {
-    body: 'This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.',
-    author: {
-      name: 'Notification',
-      image:
-        'https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80',
-    },
-  },
-  {
-    body: 'This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.',
-    author: {
-      name: 'Security',
-      image:
-        'https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80',
-    },
-  },
-  {
-    body: 'This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.',
-    author: {
-      name: 'Appearence',
-      image:
-        'https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80',
-    },
-  },
-  {
-    body: 'This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.',
-    author: {
-      name: 'Billing',
-      image:
-        'https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80',
-    },
-  },
-  {
-    body: 'This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.',
-    author: {
-      name: 'Integrations',
-      image:
-        'https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80',
-    },
-  },
-  {
-    body: 'This Pokémon likes to lick its palms that are sweetened by being soaked in honey. Teddiursa concocts its own honey by blending fruits and pollen collected by Beedrill. Blastoise has water spouts that protrude from its shell. The water spouts are very accurate.',
-    author: {
-      name: 'Additional Resources',
-      image:
-        'https://images.unsplash.com/photo-1624298357597-fd92dfbec01d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=250&q=80',
-    },
-  },
-];

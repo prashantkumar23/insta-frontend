@@ -18,6 +18,7 @@ import {
   MantineColor,
   SelectItemProps,
   Paper,
+  Grid,
 } from '@mantine/core';
 import MenuComponent from '../Menu';
 import { NextLink } from '@mantine/next';
@@ -177,10 +178,9 @@ export function Header({ user }: HeaderTabsProps) {
   });
 
   useEffect(() => {
-    if(debounced) {
+    if (debounced) {
       refetch();
     }
-
   }, [debounced]);
 
   useEffect(() => {
@@ -209,7 +209,15 @@ export function Header({ user }: HeaderTabsProps) {
 
   const AutoCompleteItem = forwardRef<HTMLDivElement, ItemProps>(
     ({ username, name, pic, _id }: ItemProps, ref) => (
-      <Paper ref={ref} p={5} mb={10} onClick={() => router.push(`/${_id}`)} radius="md" withBorder sx={{cursor: "pointer"}}>
+      <Paper
+        ref={ref}
+        p={5}
+        mb={10}
+        onClick={() => router.push(`/${_id}`)}
+        radius="md"
+        withBorder
+        sx={{ cursor: 'pointer' }}
+      >
         <Group noWrap>
           <Avatar src={pic} radius="xl" size={30} />
           <div>
@@ -229,34 +237,39 @@ export function Header({ user }: HeaderTabsProps) {
       //  style={{backgroundColor: matches ? "lightgreen": "lightcoral"}}
     >
       <Container className={classes.mainSection}>
-        <Group position="apart">
-          {/* <MantineLogo /> */}
-          <NextLink passHref href="/">
-            <IconBrandInstagram size={50} style={{ color: 'rgb(131,58,180)' }} />
-          </NextLink>
+        <Grid  justify="space-between" align={"center"}>
+          <Grid.Col span={"content"}>
+            <NextLink passHref href="/">
+              <IconBrandInstagram size={50} style={{ color: 'rgb(131,58,180)' }} />
+            </NextLink>
+          </Grid.Col>
 
-          <Group>
-            <Autocomplete
-              radius={'lg'}
-              value={searchTerm}
-              onChange={setSearchTerm}
-              placeholder="Search..."
-              itemComponent={AutoCompleteItem}
-              data={searchedData}
-              icon={<IconSearch size={16} />}
-              nothingFound={<Text>No Results found</Text>}
-              // filter={(value, item) =>
-              //   item.value.toLowerCase().includes(searchTerm.toLowerCase().trim())
-              // }
-              // style={{ width: '16rem' }}
-              transition="pop-top-left"
-              transitionDuration={80}
-              transitionTimingFunction="ease"
-            />
-          </Group>
+          <Grid.Col span={'content'}>
+            <Group>
+              <Autocomplete
+                radius={'lg'}
+                value={searchTerm}
+                onChange={setSearchTerm}
+                placeholder="Search..."
+                itemComponent={AutoCompleteItem}
+                data={searchedData}
+                icon={<IconSearch size={16} />}
+                nothingFound={<Text>No Results found</Text>}
+                // filter={(value, item) =>
+                //   item.value.toLowerCase().includes(searchTerm.toLowerCase().trim())
+                // }
+                // style={{ width: '16rem' }}
+                transition="pop-top-left"
+                transitionDuration={80}
+                transitionTimingFunction="ease"
+              />
+            </Group>
+          </Grid.Col>
 
-          <MenuComponent {...user} />
-        </Group>
+          <Grid.Col span={"content"}>
+            <MenuComponent {...user} />
+          </Grid.Col>
+        </Grid>
       </Container>
     </div>
   );
