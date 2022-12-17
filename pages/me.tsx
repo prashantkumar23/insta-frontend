@@ -15,6 +15,7 @@ const MyProfile = ({ user }: any) => {
   const router = useRouter();
   const { data, refetch, isLoading } = useGetUserPost({ username: user.username, limit: 100, skip: 0 });
 
+  console.log(user)
   useEffect(() => {
     refetch();
   }, []);

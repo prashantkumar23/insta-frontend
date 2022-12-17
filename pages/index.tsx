@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Grid, Stack, Divider } from '@mantine/core';
+import { Grid, Stack, Divider, Text } from '@mantine/core';
 import AppLayout from '../layout/AppLayout';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from 'next';
@@ -18,7 +18,7 @@ import ProfileCard from '../components/Cards/ProfileCard';
 import SkeletonProfilePostCard from '../components/Skeleton/SkeletonProfileCard';
 import SkeletonUserRecommendationCard from '../components/Skeleton/SkeletonUserRecommendation';
 
-const LIMIT = 10;
+const LIMIT = 20;
 
 const HomePage: NextPage = (props: any) => {
   const {
@@ -26,7 +26,6 @@ const HomePage: NextPage = (props: any) => {
     data,
     isLoading: isLoadingFeedPost,
   } = useGetFeedPost({ userId: props.user.id, limit: LIMIT, skip: 0 });
-
 
   const {
     refetch: UserRecommendation,
@@ -43,7 +42,6 @@ const HomePage: NextPage = (props: any) => {
   }, []);
 
   const matches = useMediaQuery('(min-width: 850px)', false, { getInitialValueInEffect: false });
-
 
   // console.log('UserRecommendationData', UserRecommendationData, props.user);
 
@@ -78,6 +76,16 @@ const HomePage: NextPage = (props: any) => {
           ) : (
             <Stack spacing={10} align={matches ? 'flex-end' : 'center'}>
               {data && data.posts && PostCardEle(data.posts)}
+              {data && data.posts.length === 0 && (
+                <Text
+                  color="dimmed"
+                  align="center"
+                  size={'xl'}
+                  sx={{ fontStyle: 'italic', width: '100%', height: '70vh', paddingTop: '30vh' }}
+                >
+                  When someone post, you'll see here in your feed
+                </Text>
+              )}
             </Stack>
           )}
         </Grid.Col>

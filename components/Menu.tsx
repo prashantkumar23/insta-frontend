@@ -66,13 +66,13 @@ function MenuComponent(user: User) {
               Create post
             </Menu.Item>
             <NextLink passHref href="/me" style={{ textDecoration: 'none' }}>
-              <Menu.Item icon={<UserCircle size={14} color={theme.colors.blue[6]} />}>
+              <Menu.Item icon={  <Avatar src={user.pic} style={{ borderRadius: '50%' }} size={14}  />}>
                 My Profile
               </Menu.Item>
             </NextLink>
 
             <NextLink passHref href="/settings" style={{ textDecoration: 'none' }}>
-              <Menu.Item icon={<Settings size={14} color={theme.colors.blue[6]} />}>
+              <Menu.Item icon={<Settings size={14} color={theme.colors.blue[6]}  />}>
                 Settings
               </Menu.Item>
             </NextLink>

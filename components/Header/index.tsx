@@ -164,7 +164,7 @@ export function Header({ user }: HeaderTabsProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchedData, setSearchedData] = useState([]);
   const router = useRouter();
-  const [debounced] = useDebouncedValue(searchTerm, 1000);
+  const [debounced] = useDebouncedValue(searchTerm, 600);
   // const matches = useMediaQuery('(max-width: 500px)', true, { getInitialValueInEffect: false });
   const {
     refetch,
@@ -213,7 +213,7 @@ export function Header({ user }: HeaderTabsProps) {
         ref={ref}
         p={5}
         mb={10}
-        onClick={() => router.push(`/${_id}`)}
+        onClick={() => router.push(`/${username}`, `/${username}` , {scroll: true})}
         radius="md"
         withBorder
         sx={{ cursor: 'pointer' }}

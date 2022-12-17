@@ -265,7 +265,7 @@ export function Register() {
                   placeholder="Code"
                   {...form.getInputProps('code')}
                   radius="xl"
-                  disabled={isConfirmLoading}
+                  // disabled={form.values(}
                 />
               </Stepper.Step>
 
