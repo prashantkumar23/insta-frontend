@@ -206,6 +206,9 @@ const PostPage: NextPage = (props: any) => {
                       {PostData?.userId.username}
                     </Text>
                   </Group>
+                  <ActionIcon onClick={() => {}} radius="xl">
+                    <IconTrash size={16} stroke={'1px'} />
+                  </ActionIcon>
                 </Group>
 
                 <Card.Section
@@ -248,10 +251,10 @@ const PostPage: NextPage = (props: any) => {
                       >
                         <IconHeart
                           size={16}
-                          fill={`${!PostData!.wasLikeByMe ? 'red' : 'white'}`}
+                          fill={`${PostData!.wasLikeByMe ? 'red' : 'white'}`}
                           stroke={'1px'}
                           style={{
-                            color: !PostData!.wasLikeByMe ? 'red' : 'black',
+                            color: PostData!.wasLikeByMe ? 'red' : 'black',
                           }}
                         />
                       </ActionIcon>

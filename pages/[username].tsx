@@ -22,20 +22,20 @@ import { useRouter } from 'next/router';
 
 import getUserDetail, { IGetUserDetail } from '../hooks/auth/useGetUserDetail';
 import { getToken } from '../utility/gettoken';
-import useGetFeedPost, { FeedPost } from '../hooks/post/useGetFeedPost';
 import SkeletonFeedCard from '../components/Skeleton/SkeletonFeedCard';
 import getOtherUserDetail, { IGetOtherUserDetail } from '../hooks/auth/useGetOtherUserDetail';
+import useGetUserPost, { UserPost } from '../hooks/post/useGetUserPost';
 
 const LIMIT = 100;
 
-const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
+export const FeedCard = ({ imageUrl, _id }: UserPost) => {
   const router = useRouter();
   return (
     <Card
       radius={'xs'}
       style={{ backgroundColor: 'transparent' }}
       // p="sm"
-      onClick={() => router.push(`/p/${id}`)}
+      onClick={() => router.push(`/p/${_id}`)}
       m={5}
       p={0}
     >
@@ -47,20 +47,6 @@ const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
         onClick={() => console.log('Card')}
         style={{ cursor: 'pointer' }}
       />
-      {/* <Group mt={10} pl={5} spacing={10} style={{ cursor: 'pointer' }}>
-        <Group spacing={4} onClick={() => router.push(`/p/${id}`)}>
-          <IconHeart size={18} stroke={1} />
-          <Text color="dimmed" size="xs">
-            {likes}
-          </Text>
-        </Group>
-        <Group spacing={4} onClick={() => router.push(`/p/${id}`)}>
-          <IconMessage2 size={18} stroke={1} />
-          <Text color="dimmed" size="xs">
-            {comments}
-          </Text>
-        </Group>
-      </Group> */}
     </Card>
   );
 };
@@ -68,11 +54,14 @@ const FeedCard = ({ comments, likes, imageUrl, id }: FeedPost) => {
 const Username: NextPage = ({ user }: any) => {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
-  const { refetch, data, isSuccess, isLoading } = useGetFeedPost({
-    userId: '638d46f65de1260ae1991bc9',
+  const router = useRouter();
+  const { refetch, data, isSuccess, isLoading } = useGetUserPost({
+    username: router.query.username as string,
     limit: LIMIT,
     skip: 0,
   });
+
+  console.log('Username on Client', router.query);
 
   useEffect(() => {
     refetch();
@@ -174,7 +163,7 @@ const Username: NextPage = ({ user }: any) => {
                     alignItems: 'center',
                   }}
                 >
-                  <Text c="dimmed" sx={{fontSize: "3rem"}} fs="italic">
+                  <Text c="dimmed" sx={{ fontSize: '3rem' }} fs="italic">
                     No post yet
                   </Text>
                 </div>
@@ -184,7 +173,7 @@ const Username: NextPage = ({ user }: any) => {
                 {data?.posts &&
                   data.posts.map((item, index) => {
                     return (
-                      <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={item.id}>
+                      <Grid.Col md={6} lg={4} sm={6} xs={12} xl={3} key={item._id}>
                         <FeedCard {...item} />
                       </Grid.Col>
                     );
@@ -215,8 +204,8 @@ const Username: NextPage = ({ user }: any) => {
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const queryClient = new QueryClient();
-   //@ts-ignore
-  const username = context.params.username; 
+  //@ts-ignore
+  const username = context.params.username;
 
   const session = await queryClient.fetchQuery<IGetUserDetail>(['getUserDetail'], async () =>
     getUserDetail(getToken(context))
@@ -254,6 +243,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       dehydratedState: dehydrate(queryClient),
       user: fetchOtherUserDetail!.user,
       otheruserId: fetchOtherUserDetail.user?._id,
+      username,
     },
   };
 }

@@ -20,12 +20,12 @@ import SkeletonUserRecommendationCard from '../components/Skeleton/SkeletonUserR
 
 const LIMIT = 10;
 
-const HomePage: NextPage = (props: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+const HomePage: NextPage = (props: any) => {
   const {
     refetch,
     data,
     isLoading: isLoadingFeedPost,
-  } = useGetFeedPost({ userId: "", limit: LIMIT, skip: 0 });
+  } = useGetFeedPost({ userId: props.user.id, limit: LIMIT, skip: 0 });
 
 
   const {

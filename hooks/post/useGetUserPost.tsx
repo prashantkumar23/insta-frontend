@@ -9,26 +9,15 @@ export interface IGetFeedPost {
   skip: number;
 }
 
-export interface FeedPost {
-  id: string;
+export interface UserPost {
+  _id: string;
   imageUrl: string;
-  caption: string;
-  likes: number;
-  comments: number;
-  createdAt: string;
-  wasLikeByMe: boolean;
-  user: {
-    id: string;
-    name: string;
-    username: string;
-    pic: string;
-  };
 }
 
 export interface FeedPostResponse {
   isSuccess: boolean;
   message: string;
-  posts: FeedPost[] | null;
+  posts: UserPost[] | null;
   count: number
 }
 
@@ -45,19 +34,8 @@ function useGetUserPost({ username, limit, skip }: IGetFeedPost) {
         message
         isSuccess
         posts {
-          id
+          _id
           imageUrl
-          likes
-          comments
-          caption
-          createdAt
-          wasLikeByMe
-          user {
-            id
-            name
-            username
-            pic
-          }
         }
         count
       }
@@ -65,7 +43,7 @@ function useGetUserPost({ username, limit, skip }: IGetFeedPost) {
   `;
 
   return useQuery<FeedPostResponse>(
-    ['getUserPost'],
+    ['getUserPost', username],
     async () => {
       const data = await graphQLClientForFrontend.request(query, variables);
       return data.getUserPost;
