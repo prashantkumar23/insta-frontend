@@ -105,7 +105,7 @@ const HomePage: NextPage = (props: any) => {
               <Divider />
               <Stack spacing={5} mt={10}>
                 <Text color={'dimmed'} sx={{ fontSize: '0.6rem' }} align="center">
-                  Made using AWS, NextJs, React Query, Mantine, NestJs and MongoDB
+                  Made using AWS, NextJs, React Query, Mantine, NestJs, GraphQL and MongoDB
                 </Text>
                 <Text color={'dimmed'} sx={{ fontSize: '0.6rem' }} align="center">
                   © Pintagram 2023 - By{" "}
