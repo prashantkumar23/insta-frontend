@@ -23,10 +23,10 @@ import { showNotification } from '@mantine/notifications';
 
 import { User } from '../../hooks/auth/useGetUserDetail';
 import { FeedPost } from '../../hooks/post/useGetFeedPost';
-import useLikePost from '../../hooks/post/useLikePost';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import useUnlikePost from '../../hooks/post/useUnlikePost';
 import useCreateCommentOnFeedPage from '../../hooks/comment/createComment/useCreateCommentOnFeedPage';
+import useLikeOnFeed from '../../hooks/post/useLike/useLikeOnFeed';
+import useUnlikeOnFeed from '../../hooks/post/useUnlike/useUnlikeOnFeed';
 dayjs.extend(relativeTime);
 
 export interface IPostCard {
@@ -92,8 +92,8 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
   const router = useRouter();
   const [comment, setComment] = useState('');
 
-  const { mutate: likePost, data: likeData } = useLikePost({ postId: id, userId: me.id });
-  const { mutate: unlikePost, data: unlikeData } = useUnlikePost({ postId: id, userId: me.id });
+  const { mutate: likePost, data: likeData } = useLikeOnFeed({ postId: id, userId: me.id });
+  const { mutate: unlikePost, data: unlikeData } = useUnlikeOnFeed({ postId: id, userId: me.id });
 
   const {
     mutate: commentPostOnFeed,
@@ -134,7 +134,9 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
         <Group position="apart">
           <Group m={0} spacing={9}>
             <Avatar src={user.pic} radius="xl" size={'sm'} />
-            <Text weight={600} size={13}>
+            <Text weight={600} size={13}
+            //  onClick={() => router.push(`/${user.id}`)} sx={{cursor: "pointer"}}
+             >
               {user.username}
             </Text>
           </Group>

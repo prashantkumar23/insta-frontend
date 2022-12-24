@@ -1,15 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { gql } from 'graphql-request';
-
-import { graphQLClientForFrontend } from '../../graphql';
-import { FeedPost } from './useGetFeedPost';
+import { graphQLClientForFrontend } from '../../../graphql';
+import { IGetPostInDetailServerResponse, SpecificPost } from '../useGetPost';
 
 export interface ILikePost {
   postId: string;
   userId: string;
 }
 
-function useLikePost({ postId, userId }: ILikePost) {
+function useLikeOnPostPage({ postId, userId }: ILikePost) {
   const queryClient = useQueryClient();
 
   const variables = {
@@ -33,38 +32,31 @@ function useLikePost({ postId, userId }: ILikePost) {
     },
     {
       retry: false,
-      onMutate: async (post: FeedPost) => {
+      onMutate: async (post: SpecificPost) => {
         await queryClient.cancelQueries(['likePost', postId]);
 
-        const previousPost = queryClient.getQueryData(['getFeedPost']);
+        // console.log('Get Post Id', post._id);
+        const previousPost = queryClient.getQueryData(['getPost', post._id]);
 
-        // console.log('Got this previous post', previousPost);
+        queryClient.setQueryData(['getPost', post._id], (prev: any) => {
+        //   console.log('Prev', previousPost);
 
-        queryClient.setQueryData(['getFeedPost'], (prev: any) => {
-          // console.log("Prev", prev)
-          let feedPost: FeedPost[] = [...prev.posts];
+          const postData: IGetPostInDetailServerResponse = { ...prev };
+          let postPage: SpecificPost = postData.post;
 
-          const indexOfLikePost = feedPost.findIndex((p: FeedPost) => p.id === post.id);
-
-          let likedPost = feedPost.find((p) => p.id === post.id);
-
-          let updatedlikedPost = {
-            ...likedPost,
+          let updatedPost: SpecificPost = {
+            ...postPage,
             wasLikeByMe: true,
-            likes: likedPost!.likes + 1,
+            likes: postPage!.likes + 1,
           };
-          // @ts-ignore
-          feedPost[indexOfLikePost] = updatedlikedPost!;
-          // console.log('Feed POSt after setting like', feedPost);
 
-          const feedPostNew: any = {
-            count: prev.count,
+          const newUpdatedPost: IGetPostInDetailServerResponse = {
             isSuccess: prev.isSuccess,
             message: prev.message,
-            posts: feedPost,
+            post: updatedPost,
           };
 
-          return feedPostNew;
+          return newUpdatedPost;
         });
 
         // console.log('Returning from OnMutate', previousPost);
@@ -72,14 +64,14 @@ function useLikePost({ postId, userId }: ILikePost) {
       },
       onError: (err: any, variables: any, context: any) => {
         // console.log('Context in Error', context);
-        queryClient.setQueryData(['getFeedPost'], context);
+        queryClient.setQueryData(['getPost', postId], context);
       },
       onSettled: (data: any, error: any, variables: any, context: any) => {
         // console.log('Context in onSettled', context);
-        queryClient.invalidateQueries(['getFeedPost'], context);
+        queryClient.invalidateQueries(['getPost', postId], context);
       },
     }
   );
 }
 
-export default useLikePost;
+export default useLikeOnPostPage;

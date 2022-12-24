@@ -54,8 +54,9 @@ async function getOtherUserDetail(
           email
           email_verified
           numberOfPosts
-          numberOfFollowers
-          numberOfFollowings
+          numberOffollowers
+          numberOffollowings
+          followedByMe
         }
       }
     }

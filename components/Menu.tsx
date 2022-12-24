@@ -63,11 +63,11 @@ function MenuComponent(user: User) {
               onClick={() => setOpened(true)}
               disabled={isLoading}
             >
-              Create post
+              Create Post
             </Menu.Item>
             <NextLink passHref href="/me" style={{ textDecoration: 'none' }}>
               <Menu.Item icon={  <Avatar src={user.pic} style={{ borderRadius: '50%' }} size={14}  />}>
-                My Profile
+                View Profile
               </Menu.Item>
             </NextLink>
 

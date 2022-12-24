@@ -26,7 +26,7 @@ const UploadProfileImage = ({ opened, setOpened, user }: ICreatePostDialog) => {
 
   useEffect(() => {
     if (data && data.isSuccess) {
-      queryClient.refetchQueries(['getUserDetail']);
+      queryClient.invalidateQueries(['getUserDetail']);
       showNotification({
         message: data!.message,
         radius: 'sm',

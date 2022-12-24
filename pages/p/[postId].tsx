@@ -20,7 +20,7 @@ import { memo, useEffect, useMemo, useState } from 'react';
 
 import { ReadMoreOrLess } from '../../components/Cards/PostCard';
 import getUserDetail, { IGetUserDetail } from '../../hooks/auth/useGetUserDetail';
-import useGetPost, {
+import {
   IGetPostInDetailServerResponse,
   SpecificPost,
 } from '../../hooks/post/useGetPost';
@@ -39,11 +39,11 @@ import {
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
-import useLikePost from '../../hooks/post/useLikePost';
-import useUnlikePost from '../../hooks/post/useUnlikePost';
 import getPostInDetails from '../../hooks/post/useGetPost';
 import { showNotification } from '@mantine/notifications';
 import useCreateCommentOnPostPage from '../../hooks/comment/createComment/useCreateCommentOnPostPage';
+import useLikeOnPostPage from '../../hooks/post/useLike/useLikeOnPostPage';
+import useUnlikeOnPostPage from '../../hooks/post/useUnlike/useUnlikeOnPostPage';
 dayjs.extend(relativeTime);
 
 const CommentSection = memo(({ PostData }: { PostData: SpecificPost }) => {
@@ -121,12 +121,12 @@ const PostPage: NextPage = (props: any) => {
     postId: postId as string,
   });
 
-  const { mutate: likePost, data: likeData } = useLikePost({
+  const { mutate: likePost, data: likeData } = useLikeOnPostPage({
     postId: PostData ? PostData._id : '',
     userId: props.user.id,
   });
 
-  const { mutate: unlikePost, data: unlikeData } = useUnlikePost({
+  const { mutate: unlikePost, data: unlikeData } = useUnlikeOnPostPage({
     postId: PostData ? PostData._id : '',
     userId: props.user.id,
   });
@@ -243,9 +243,9 @@ const PostPage: NextPage = (props: any) => {
                       <ActionIcon
                         onClick={() => {
                           if (PostData!.wasLikeByMe) {
-                            // unlikePost(PostData);
+                            unlikePost(PostData);
                           } else {
-                            // likePost(PostData);
+                            likePost(PostData);
                           }
                         }}
                       >

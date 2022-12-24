@@ -25,6 +25,10 @@ import { getToken } from '../utility/gettoken';
 import SkeletonFeedCard from '../components/Skeleton/SkeletonFeedCard';
 import getOtherUserDetail, { IGetOtherUserDetail } from '../hooks/auth/useGetOtherUserDetail';
 import useGetUserPost, { UserPost } from '../hooks/post/useGetUserPost';
+import useFollow from '../hooks/user/useFollow';
+import useUnfollow from '../hooks/user/useUnfollow';
+import { showNotification } from '@mantine/notifications';
+import { IconCheck } from '@tabler/icons';
 
 const LIMIT = 100;
 
@@ -51,7 +55,7 @@ export const FeedCard = ({ imageUrl, _id }: UserPost) => {
   );
 };
 
-const Username: NextPage = ({ user }: any) => {
+const Username: NextPage = ({ user, sessionuser }: any) => {
   const theme = useMantineTheme();
   const [opened, setOpened] = useState(false);
   const router = useRouter();
@@ -61,7 +65,16 @@ const Username: NextPage = ({ user }: any) => {
     skip: 0,
   });
 
-  console.log('Username on Client', router.query);
+  const { mutate: followMutate, isSuccess: followIsSuccess, isLoading: followIsLoading } = useFollow({
+    username: sessionuser.id,
+    whoToFollow: user._id,
+  });
+  const { mutate: unfollowMutate, isSuccess: unfollowIsSuccess, isLoading: unfollowingIsLoading } = useUnfollow({
+    username: sessionuser.id,
+    whoToUnfollow: user._id,
+  });
+
+  console.log('Username on Client', user, sessionuser);
 
   useEffect(() => {
     refetch();
@@ -71,9 +84,31 @@ const Username: NextPage = ({ user }: any) => {
     // if (isSuccess) console.log('Post ************', data);
   }, [isSuccess]);
 
+  useEffect(() => {
+    if (followIsSuccess) {
+      showNotification({
+        message: `You are now following ${router.query.username}`,
+        radius: 'sm',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+    }
+  }, [followIsSuccess]);
+
+  useEffect(() => {
+    if (unfollowIsSuccess) {
+      showNotification({
+        message: `Unfollowed ${router.query.username}`,
+        radius: 'sm',
+        color: 'green',
+        icon: <IconCheck size={18} />,
+      });
+    }
+  }, [unfollowIsSuccess]);
+
   return (
     <Fragment>
-      <AppLayout user={user}>
+      <AppLayout user={sessionuser}>
         <Stack>
           <Center style={{}}>
             <Grid style={{ textAlign: 'center', width: '65%' }}>
@@ -109,7 +144,7 @@ const Username: NextPage = ({ user }: any) => {
                   <Grid.Col span={4}>
                     <Stack spacing={0}>
                       <Text weight={700} size="xl">
-                        {user?.numberOfFollowers}
+                        {user?.numberOffollowers}
                       </Text>
                       <Text color={'dimmed'} size="sm">
                         Followers
@@ -119,7 +154,7 @@ const Username: NextPage = ({ user }: any) => {
                   <Grid.Col span={4}>
                     <Stack spacing={0}>
                       <Text weight={700} size="xl">
-                        {user?.numberOfFollowings}
+                        {user?.numberOffollowings}
                       </Text>
                       <Text color={'dimmed'} size="sm">
                         Following
@@ -129,8 +164,17 @@ const Username: NextPage = ({ user }: any) => {
                 </Grid>
 
                 <div style={{ margin: '1rem', marginBottom: 0 }}>
-                  <Button radius={'lg'} style={{ width: '100%' }}>
-                    Follow
+                  <Button radius={'lg'} style={{ width: '100%' }} onClick={() => {
+                    if(user.followedByMe) {
+                      unfollowMutate();
+                    } else {
+                      followMutate();
+                    }
+                  }}
+                  loading={followIsLoading || unfollowingIsLoading}
+                  disabled={followIsLoading || unfollowingIsLoading}
+                  >
+                    {user.followedByMe ? 'Unfollow' : 'Follow'}
                   </Button>
                 </div>
               </Grid.Col>
@@ -236,14 +280,12 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
   );
 
-  console.log('F********', fetchOtherUserDetail);
 
   return {
     props: {
       dehydratedState: dehydrate(queryClient),
       user: fetchOtherUserDetail!.user,
-      otheruserId: fetchOtherUserDetail.user?._id,
-      username,
+      sessionuser: fetchedUser.user,
     },
   };
 }
