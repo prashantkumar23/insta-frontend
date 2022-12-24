@@ -17,6 +17,7 @@ import {
 import {
   IconX,
   IconCheck,
+  IconBrandInstagram,
 } from '@tabler/icons';
 import Link from 'next/link';
 
@@ -101,10 +102,11 @@ function LoginPage(props: any) {
         }}
       >
         <Paper shadow={undefined} radius="lg" p="xl" withBorder style={{ width: '100%' }}>
-          <Center mb={20}>
-            <Title>
+          <Center mb={20} >
+          <IconBrandInstagram size={40} style={{ color: 'rgb(131,58,180)' }} />
+            <Text sx={{fontSize: "2rem" , fontStyle: "italic", fontWeight: 600}} ml={5}>
               Welcome Back!
-            </Title>
+            </Text>
           </Center>
 
           <form onSubmit={form.onSubmit(() => mutate())}>

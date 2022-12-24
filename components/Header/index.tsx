@@ -238,13 +238,13 @@ export function Header({ user }: HeaderTabsProps) {
     >
       <Container className={classes.mainSection}>
         <Grid  justify="space-between" align={"center"}>
-          <Grid.Col span={"content"}>
+          <Grid.Col span={3}>
             <NextLink passHref href="/">
               <IconBrandInstagram size={50} style={{ color: 'rgb(131,58,180)' }} />
             </NextLink>
           </Grid.Col>
 
-          <Grid.Col span={'content'}>
+          <Grid.Col span={6} >
             <Group>
               <Autocomplete
                 radius={'lg'}
@@ -266,7 +266,7 @@ export function Header({ user }: HeaderTabsProps) {
             </Group>
           </Grid.Col>
 
-          <Grid.Col span={"content"}>
+          <Grid.Col span={3}>
             <MenuComponent {...user} />
           </Grid.Col>
         </Grid>

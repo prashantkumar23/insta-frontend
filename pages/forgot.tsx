@@ -22,7 +22,7 @@ import { CognitoUser } from 'amazon-cognito-identity-js';
 import { showNotification } from '@mantine/notifications';
 // import useResetPassword from '../hooks/auth/useResetPassword';
 import { NextLink } from '@mantine/next';
-import { IconCheck, IconInfoCircle, IconX } from '@tabler/icons';
+import { IconBrandInstagram, IconCheck, IconInfoCircle, IconX } from '@tabler/icons';
 import useSendCode from '../hooks/auth/useSendCode';
 import useResetPassword from '../hooks/auth/useResetPassword';
 
@@ -63,7 +63,7 @@ function ForgotPassword() {
   const [passwordError, setPasswordError] = useState({ value: false, message: '' });
   const [username, setUsername] = useState('');
   const theme = useMantineTheme();
-  const { isSuccess, isError,mutate, isLoading, data } = useSendCode({
+  const { isSuccess, isError, mutate, isLoading, data } = useSendCode({
     email: email.value,
   });
   const {
@@ -72,16 +72,16 @@ function ForgotPassword() {
     data: dataRP,
     isLoading: isLoadingRP,
     mutate: mutateRP,
-    error: errorRP
+    error: errorRP,
   } = useResetPassword({ username, code: code.trim(), newPassword: password });
 
   useEffect(() => {
     if (stage === 2) {
       setUsername(JSON.parse(localStorage.getItem('username_temp') as string));
-    } 
+    }
 
-    if(stage === 3) {
-      localStorage.removeItem("username_temp")
+    if (stage === 3) {
+      localStorage.removeItem('username_temp');
     }
   }, [stage]);
 
@@ -170,7 +170,7 @@ function ForgotPassword() {
       });
       return;
     }
-    mutateRP()
+    mutateRP();
   };
 
   return (
@@ -186,9 +186,12 @@ function ForgotPassword() {
           }}
         >
           <Paper style={{ width: '100%' }} p="xl" radius={'xl'}>
-            <Title className={classes.title} align="center">
-              Forgot your password ?
-            </Title>
+            <Center>
+              <IconBrandInstagram size={35} style={{ color: 'rgb(131,58,180)' }} />
+              <Title className={classes.title} align="center" ml={5}>
+                Forgot your password ?
+              </Title>
+            </Center>
             <Text color="dimmed" size="sm" align="center">
               Enter your registered email to get a code
             </Text>
@@ -196,7 +199,7 @@ function ForgotPassword() {
             <Paper p={30} radius="xl" mt="xl">
               <TextInput
                 label="Your email"
-                placeholder="me@me.com"
+                placeholder="xyz@abc.com"
                 required
                 radius={'xl'}
                 value={email.value}
@@ -224,7 +227,7 @@ function ForgotPassword() {
                   loading={isLoading}
                   disabled={isLoading}
                 >
-                  Send the code
+                  Send code
                 </Button>
               </Group>
             </Paper>

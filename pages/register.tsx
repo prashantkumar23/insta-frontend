@@ -14,7 +14,14 @@ import {
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { NextLink } from '@mantine/next';
-import { IconX, IconCheck } from '@tabler/icons';
+import {
+  IconX,
+  IconCheck,
+  IconUserCheck,
+  IconMailOpened,
+  IconShieldCheck,
+  IconBrandInstagram,
+} from '@tabler/icons';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
 import { showNotification } from '@mantine/notifications';
 import { ISignUpResult } from 'amazon-cognito-identity-js';
@@ -200,28 +207,20 @@ export function Register() {
   return (
     <div className={classes.wrapper}>
       <Paper className={classes.form} radius={0} p={30}>
-        <Container size={500}>
-          <Title
-            align="center"
-            sx={(theme) => ({ fontFamily: `Greycliff CF, ${theme.fontFamily}`, fontWeight: 900 })}
-          >
-            Welcome to Insta Clone!
-          </Title>
+        <Container size={500} sx={{display: "flex", alignItems: "center", justifyContent:"center", columnGap: 10}} mb={40}>
+          <IconBrandInstagram size={40} style={{ color: 'rgb(131,58,180)' }} />
+          <Text fs="italic" sx={() => ({ fontWeight: 600, fontSize: '2rem' })}>
+            Pintagram
+          </Text>
         </Container>
 
         <Container size={500}>
           <Paper shadow="none" radius="xl" p="xl" style={{ width: '100%' }}>
-            <Stepper active={active} breakpoint="sm" size="xs">
-              <Stepper.Step
-              // label="General Information"
-              // description="Enter the Details"
-              // icon={
-              //   <IconSignRight size={18} style={{ backgroundColor: 'green', color: 'white' }} />
-              // }
-              >
+            <Stepper active={active} size="xs" orientation='horizontal'>
+              <Stepper.Step icon={<IconUserCheck size={18} />}>
                 <TextInput
                   label="Name"
-                  placeholder="Name"
+                  placeholder="Enter your name"
                   {...form.getInputProps('name')}
                   radius="xl"
                   size="sm"
@@ -230,7 +229,7 @@ export function Register() {
                 <TextInput
                   mt="md"
                   label="Username"
-                  placeholder="Username"
+                  placeholder="Enter something unique"
                   {...form.getInputProps('username')}
                   radius="xl"
                   disabled={isLoading}
@@ -239,7 +238,7 @@ export function Register() {
                   mt="md"
                   label="Email"
                   type="email"
-                  placeholder="Email"
+                  placeholder="abc@xyz.com"
                   {...form.getInputProps('email')}
                   radius="xl"
                   disabled={isLoading}
@@ -247,19 +246,14 @@ export function Register() {
                 <PasswordInput
                   mt="md"
                   label="Password"
-                  placeholder="Password"
+                  placeholder="*********"
                   {...form.getInputProps('password')}
                   radius="xl"
                   disabled={isLoading}
                 />
               </Stepper.Step>
 
-              <Stepper.Step
-              // label="Verify Email"
-              // description="Enter the code"
-              // icon={<IconMailOpened size={18} />}
-              // loading
-              >
+              <Stepper.Step icon={<IconMailOpened size={18} />}>
                 <TextInput
                   label="Enter the code"
                   placeholder="Code"
@@ -298,7 +292,7 @@ export function Register() {
               )}
               {active !== 2 && (
                 <Button onClick={nextStep} radius="xl" loading={isLoading || isConfirmFetching}>
-                  Next step
+                  Next
                 </Button>
               )}
               {active == 2 && (
