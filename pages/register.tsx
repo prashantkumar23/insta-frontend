@@ -22,7 +22,7 @@ import {
   IconShieldCheck,
   IconBrandInstagram,
 } from '@tabler/icons';
-import { dehydrate, QueryClient } from '@tanstack/react-query';
+import { dehydrate, QueryClient, useQueryClient } from '@tanstack/react-query';
 import { showNotification } from '@mantine/notifications';
 import { ISignUpResult } from 'amazon-cognito-identity-js';
 import Link from 'next/link';
@@ -72,6 +72,7 @@ type SUCCESS = 'SUCCESS';
 
 export function Register() {
   const { classes } = useStyles();
+  const queryClient = useQueryClient();
   const [active, setActive] = useState(0);
   const theme = useMantineTheme();
   const [signUpResult, setSignUpResult] = useState<ISignUpResult | undefined | SUCCESS>(undefined);
@@ -163,9 +164,9 @@ export function Register() {
     isLoading: isConfirmLoading,
   } = useConfirmCodeNew({ username: form.values.username, code: form.values.code });
 
-  // if (isConfirmSuccess) {
-  //   console.log('Confirm Data', confirmData);
-  // }
+  useEffect(() => {
+    form.reset();
+  }, []);
 
   useEffect(() => {
     if (isConfirmError) {
@@ -207,7 +208,11 @@ export function Register() {
   return (
     <div className={classes.wrapper}>
       <Paper className={classes.form} radius={0} p={30}>
-        <Container size={500} sx={{display: "flex", alignItems: "center", justifyContent:"center", columnGap: 10}} mb={40}>
+        <Container
+          size={500}
+          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', columnGap: 10 }}
+          mb={40}
+        >
           <IconBrandInstagram size={40} style={{ color: 'rgb(131,58,180)' }} />
           <Text fs="italic" sx={() => ({ fontWeight: 600, fontSize: '2rem' })}>
             Pintagram
@@ -216,7 +221,7 @@ export function Register() {
 
         <Container size={500}>
           <Paper shadow="none" radius="xl" p="xl" style={{ width: '100%' }}>
-            <Stepper active={active} size="xs" orientation='horizontal'>
+            <Stepper active={active} size="xs" orientation="horizontal">
               <Stepper.Step icon={<IconUserCheck size={18} />}>
                 <TextInput
                   label="Name"
@@ -264,7 +269,22 @@ export function Register() {
               </Stepper.Step>
 
               <Stepper.Completed>
-                <Title align="center">Congraulations! Welcome to Insta Clone community</Title>
+                <Container
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    columnGap: 10,
+                    width: '100%',
+                  }}
+                  mt={40}
+                >
+                  <IconBrandInstagram size={30} style={{ color: 'rgb(131,58,180)' }} />
+                  <Text fs="italic" sx={() => ({ fontWeight: 600, fontSize: '1.2rem' })}>
+                    Welcome to Pintagram
+                  </Text>
+                </Container>
+
                 <Text align="center" mt={15} size="xs">
                   Now you can login
                 </Text>

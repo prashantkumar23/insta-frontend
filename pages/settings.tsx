@@ -65,7 +65,7 @@ const SettingsPage = (props: any) => {
               </Center>
 
               <Grid justify={'center'} align="center" mt={20} gutter={30}>
-                <Grid.Col span={'content'}>
+                <Grid.Col xs={12} sm={4}>
                   <Stack>
                     <Stack spacing={5}>
                       <Text size="xs">Name</Text>
@@ -81,6 +81,7 @@ const SettingsPage = (props: any) => {
                           })
                         }
                         radius="lg"
+                        size='xs'
                       />
                     </Stack>
 
@@ -88,6 +89,7 @@ const SettingsPage = (props: any) => {
                       <Text size={"xs"}>Username</Text>
                       <TextInput
                         disabled
+                        size='xs'
                         value={user.username}
                         onChange={(e) =>
                           setUser((prevState) => {
@@ -105,6 +107,7 @@ const SettingsPage = (props: any) => {
                       <Text size={"xs"}>Email</Text>
                       <TextInput
                         disabled
+                        size='xs'
                         value={user.email}
                         onChange={(e) =>
                           setUser((prevState) => {

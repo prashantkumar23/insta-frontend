@@ -206,9 +206,9 @@ const PostPage: NextPage = (props: any) => {
                       {PostData?.userId.username}
                     </Text>
                   </Group>
-                  <ActionIcon onClick={() => {}} radius="xl">
+                  {/* <ActionIcon onClick={() => {}} radius="xl">
                     <IconTrash size={16} stroke={'1px'} />
-                  </ActionIcon>
+                  </ActionIcon> */}
                 </Group>
 
                 <Card.Section

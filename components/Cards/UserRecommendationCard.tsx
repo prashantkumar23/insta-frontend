@@ -39,7 +39,7 @@ const UserRecommendationCard: React.FC<UserRecommendationCardProps> = ({
     if (followIsSuccess) {
       queryClient.invalidateQueries(['getUserRecommendation']);
       showNotification({
-        message: `You are now following ${userId}`,
+        message: `You are now following ${username}`,
         radius: 'sm',
         color: 'green',
         icon: <IconCheck size={18} />,
@@ -51,7 +51,7 @@ const UserRecommendationCard: React.FC<UserRecommendationCardProps> = ({
     if (unfollowIsSuccess) {
       queryClient.invalidateQueries(['getUserRecommendation']);
       showNotification({
-        message: `Unfollowed ${userId}`,
+        message: `Unfollowed ${username}`,
         radius: 'sm',
         color: 'green',
         icon: <IconCheck size={18} />,
@@ -71,7 +71,7 @@ const UserRecommendationCard: React.FC<UserRecommendationCardProps> = ({
               //   pathname: `/${username}`,
               //   query: { username },
               // },
-              `/${username}`
+              `/${username}`,
             )
           }
           sx={{ cursor: 'pointer' }}

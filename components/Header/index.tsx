@@ -1,31 +1,21 @@
-import React, {
-  forwardRef,
-  Fragment,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import React, { forwardRef, useEffect, useState } from 'react';
 import {
   createStyles,
   Container,
   Group,
-  Button,
-  Indicator,
   Text,
   Autocomplete,
   Avatar,
-  MantineColor,
   SelectItemProps,
   Paper,
   Grid,
+  Center,
 } from '@mantine/core';
 import MenuComponent from '../Menu';
 import { NextLink } from '@mantine/next';
 import { IconBrandInstagram, IconSearch } from '@tabler/icons';
 
-import { AccountContext } from '../../context/Accounts';
-import { useDebouncedValue, useMediaQuery } from '@mantine/hooks';
+import { useDebouncedValue } from '@mantine/hooks';
 import { User } from '../../hooks/auth/useGetUserDetail';
 import useSearch from '../../hooks/useSearch';
 import { useRouter } from 'next/router';
@@ -213,7 +203,7 @@ export function Header({ user }: HeaderTabsProps) {
         ref={ref}
         p={5}
         mb={10}
-        onClick={() => router.push(`/${username}`, `/${username}` , {scroll: true})}
+        onClick={() => router.push(`/${username}`, `/${username}`, { scroll: true })}
         radius="md"
         withBorder
         sx={{ cursor: 'pointer' }}
@@ -237,15 +227,15 @@ export function Header({ user }: HeaderTabsProps) {
       //  style={{backgroundColor: matches ? "lightgreen": "lightcoral"}}
     >
       <Container className={classes.mainSection}>
-        <Grid  justify="space-between" align={"center"}>
+        <Grid justify="space-between" align={'center'}>
           <Grid.Col span={3}>
             <NextLink passHref href="/">
               <IconBrandInstagram size={50} style={{ color: 'rgb(131,58,180)' }} />
             </NextLink>
           </Grid.Col>
 
-          <Grid.Col span={6} >
-            <Group>
+          <Grid.Col span={6}>
+            <Center>
               <Autocomplete
                 radius={'lg'}
                 value={searchTerm}
@@ -259,11 +249,12 @@ export function Header({ user }: HeaderTabsProps) {
                 //   item.value.toLowerCase().includes(searchTerm.toLowerCase().trim())
                 // }
                 // style={{ width: '16rem' }}
+                sx={{ maxWidth: '22rem' }}
                 transition="pop-top-left"
                 transitionDuration={80}
                 transitionTimingFunction="ease"
               />
-            </Group>
+            </Center>
           </Grid.Col>
 
           <Grid.Col span={3}>

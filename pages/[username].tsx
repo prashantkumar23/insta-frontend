@@ -16,7 +16,7 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import AppLayout from '../layout/AppLayout';
-import { dehydrate, QueryClient } from '@tanstack/react-query';
+import { dehydrate, QueryClient, useQueryClient } from '@tanstack/react-query';
 import { GetServerSidePropsContext, NextPage } from 'next';
 import { useRouter } from 'next/router';
 
@@ -57,6 +57,7 @@ export const FeedCard = ({ imageUrl, _id }: UserPost) => {
 
 const Username: NextPage = ({ user, sessionuser }: any) => {
   const theme = useMantineTheme();
+  const queryClient = useQueryClient();
   const [opened, setOpened] = useState(false);
   const router = useRouter();
   const { refetch, data, isSuccess, isLoading } = useGetUserPost({
@@ -64,6 +65,7 @@ const Username: NextPage = ({ user, sessionuser }: any) => {
     limit: LIMIT,
     skip: 0,
   });
+
 
   const { mutate: followMutate, isSuccess: followIsSuccess, isLoading: followIsLoading } = useFollow({
     username: sessionuser.id,
@@ -92,6 +94,8 @@ const Username: NextPage = ({ user, sessionuser }: any) => {
         color: 'green',
         icon: <IconCheck size={18} />,
       });
+      // queryClient.refetchQueries(["getOtherUserDetail"])
+      router.reload();
     }
   }, [followIsSuccess]);
 
@@ -103,6 +107,8 @@ const Username: NextPage = ({ user, sessionuser }: any) => {
         color: 'green',
         icon: <IconCheck size={18} />,
       });
+      // queryClient.refetchQueries(["getOtherUserDetail"])
+      router.reload();
     }
   }, [unfollowIsSuccess]);
 
@@ -264,7 +270,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     };
   }
 
-  console.log('Context', context.params);
+
 
   const fetchedUser = queryClient.getQueryData<IGetUserDetail>(['getUserDetail']);
 
@@ -280,7 +286,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     }
   );
 
-
+  console.log('Context', fetchOtherUserDetail.user);
   return {
     props: {
       dehydratedState: dehydrate(queryClient),

@@ -70,7 +70,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children, style, user }) => {
       styles={{
         main: {
           background: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
-          minHeight: 'calc(100vh - 107px)',
+          minHeight: 'calc(100vh - 90px)',
         },
       }}
       style={style}

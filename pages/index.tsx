@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
 import { Grid, Stack, Divider, Text } from '@mantine/core';
-import AppLayout from '../layout/AppLayout';
 import { dehydrate, QueryClient } from '@tanstack/react-query';
-import { GetServerSidePropsContext, InferGetServerSidePropsType, NextPage } from 'next';
+import { GetServerSidePropsContext,  NextPage } from 'next';
 import { useMediaQuery } from '@mantine/hooks';
+import Link from 'next/link';
 
+import AppLayout from '../layout/AppLayout';
 import PostCard from '../components/Cards/PostCard';
 import UserRecommendationCard from '../components/Cards/UserRecommendationCard';
 import useGetFeedPost, { FeedPost } from '../hooks/post/useGetFeedPost';
@@ -18,7 +19,8 @@ import ProfileCard from '../components/Cards/ProfileCard';
 import SkeletonProfilePostCard from '../components/Skeleton/SkeletonProfileCard';
 import SkeletonUserRecommendationCard from '../components/Skeleton/SkeletonUserRecommendation';
 
-const LIMIT = 20;
+
+const LIMIT = 40;
 
 const HomePage: NextPage = (props: any) => {
   const {
@@ -80,7 +82,7 @@ const HomePage: NextPage = (props: any) => {
                 <Text
                   color="dimmed"
                   align="center"
-                  size={'xl'}
+                  size={'md'}
                   sx={{ fontStyle: 'italic', width: '100%', height: '70vh', paddingTop: '30vh' }}
                 >
                   When someone post, you'll see here in your feed
@@ -97,10 +99,19 @@ const HomePage: NextPage = (props: any) => {
               ) : (
                 <ProfileCard pic={props.user.pic} username={props.user.username} />
               )}
-
-              {UserRecommendationData && <Divider />}
+              {UserRecommendationData && UserRecommendationData.users.length > 0 && <Divider />}
               {isLoadingUserRecommendation && <SkeletonUserRecommendationCard />}
               {UserRecommendationData && UserRecommendationEle()}
+              <Divider />
+              <Stack spacing={5} mt={10}>
+                <Text color={'dimmed'} sx={{ fontSize: '0.6rem' }} align="center">
+                  Made using AWS, NextJs, React Query, Mantine, NestJs and MongoDB
+                </Text>
+                <Text color={'dimmed'} sx={{ fontSize: '0.6rem' }} align="center">
+                  © Pintagram 2023 - By{" "}
+                  <Link href="https://github.com/prashantkumar23" style={{fontStyle: "italic"}}>Prashant</Link>
+                </Text>
+              </Stack>
             </Stack>
           </Grid.Col>
         ) : null}
