@@ -191,8 +191,8 @@ const PostPage: NextPage = (props: any) => {
                 width: '60%',
                 '@media (max-width: 700px)': {
                   width: '100%',
-                },
-              })}
+              },
+            })}
               withBorder
               radius={'lg'}
               p={15}

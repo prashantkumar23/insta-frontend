@@ -227,7 +227,12 @@ const PostCard: React.FC<IPostCard> = ({ post, me }) => {
               radius="lg"
               size="xs"
               maxLength={200}
-              onKeyDown={(e) => (e.key === 'Enter' ? commentPostOnFeed(post) : undefined)}
+              onKeyDown={(e) => {
+                if(e.key === "Enter") {
+                  setComment("")
+                  commentPostOnFeed(post)
+                }
+              }}
               rightSection={
                 <Button
                   mr={20}
